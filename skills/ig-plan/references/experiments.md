@@ -21,6 +21,10 @@ are not recommendations or evidence of adequate sample size. For an unpublished
 plan use `assignments: []`; add actual published IDs as they become available,
 without representing draft labels as published observations. Save revised plans
 as new snapshots and disclose whether assignments/criteria changed after seeing results.
+If a local [publication ledger](../../ig-account/references/publications.md)
+exists, reconcile its latest identities against the CSV before assigning or
+reviewing those IDs. Resolve conflicts with supplied facts; the ledger remains
+user-reported and cannot verify creative execution or external publication.
 
 | Field | Contract |
 | --- | --- |

@@ -63,6 +63,13 @@ Drafts and approvals in `log` are not proof a post was published. Match results
 to published post IDs/URLs where supplied and keep planned versus observed data
 separate. Never fill missing results with zero or merge another brand's history.
 
+If the account has a resolved `publications` ledger, use
+[publication reconciliation](../ig-account/references/publications.md) to match
+the CSV's post IDs, format, distribution and publication instants before
+interpreting results. Disclose conflicts and unmatched IDs; resolve confirmed
+corrections without silently dropping rows. A matching local record is still
+user-reported identity context, not platform verification or performance evidence.
+
 For supplied CSV data, use [the local CSV workflow](references/csv-analysis.md)
 and `analyse.py` for calculations. Map confirmed source fields to `template.csv`;
 native exports may need adaptation. Pass the publishing `--account` and a

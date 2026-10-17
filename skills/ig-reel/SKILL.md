@@ -134,6 +134,10 @@ Reply "yes" to log it, or tell me what to change.
 **7. Never publish.** This skill produces a script. The user shoots it and
 posts it. On "yes", append to the resolved `log` path with the date, the
 hook formula used and the first line, so `/ig-audit` has a history later.
+Label this as draft approval, not publication. If the user later supplies the
+actual published post ID and time, use
+[publication records](../ig-account/references/publications.md) to connect the
+local content reference; never infer publication from this approval.
 
 ## On-screen text is a separate script
 

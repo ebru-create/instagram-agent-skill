@@ -125,6 +125,11 @@ observation age and a review date/window. State what could confound the result.
 A couple of posts can guide a next experiment; they do not establish causality.
 If evidence remains weak, continue or revise the test rather than automatically
 scaling the highest-view post. Track actual execution separately from a draft.
+Give slots stable local content references when tracking execution. When the user
+later reports an actual publication, connect the reference to its supplied post
+ID/time through [publication records](../ig-account/references/publications.md).
+A planned date or draft approval must not create a published record. Reconcile
+identity conflicts before using CSV results in the next plan.
 
 For a structured two-approach test with an agreed metric and practical difference,
 use [experiment records and CSV review](references/experiments.md). Validate a

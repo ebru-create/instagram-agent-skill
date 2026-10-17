@@ -1,9 +1,11 @@
 ---
 name: ig-account
 description: >-
-  Set up or select separate local Instagram account profiles. Use when the user
+  Set up separate local Instagram account profiles and track user-reported
+  publications. Use when the user
   manages multiple brands, adds an Instagram account, switches the publishing
-  account, or asks which account's saved context is in use. This manages local
+  account, asks which account's context is in use, records a published post, or
+  reconciles publication identities against CSV data. This manages local
   files, not Instagram authentication or account settings.
 ---
 
@@ -41,6 +43,12 @@ repository's `templates/voice.md` (installer-bundled copies are at
 another brand.
 Other context files are created only when the workflow produces their content.
 `results.md` stores account-specific audit findings for later planning.
+The optional resolved `publications` path (`publications.json`) stores
+user-reported published items separately from draft approvals. When the user
+reports a publication, use [publication records](references/publications.md)
+and `publication.py` with their actual post ID/time and a stable local content
+reference. Missing facts stay unknown. This does not publish or verify Instagram
+activity; setup does not auto-create a publication ledger.
 `strategy.md` stores supplied or confirmed goals, production capacity and review
 criteria; use `templates/strategy.md` from the repository or the installer-bundled
 `assets/templates/strategy.md` if useful. It is optional and is not auto-created or populated with guessed preferences.

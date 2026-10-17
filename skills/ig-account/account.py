@@ -8,6 +8,7 @@ import re
 
 
 FILES = {name: name + ".md" for name in ("voice", "strategy", "plan", "swipe", "log", "results")}
+FILES["publications"] = "publications.json"
 FILES["lexicon"] = "slop.json"
 FILES["lexicon_tr"] = "slop.tr.json"
 DEFAULT_ROOT = "~/.claude/instagram"
