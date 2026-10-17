@@ -8,8 +8,9 @@ Kurucu Claude eklenti dosyalarına ihtiyaç duymaz. `.claude-plugin/` yalnızca
 Claude marketplace dağıtımı içindir; sürüm paketleyicisi iki sürümün eşleşmesini
 ayrıca kontrol eder. Kurulum model, API anahtarı veya model sağlayıcısı seçmez.
 
-Python araçları model çağırmadan yerel dosyalar üzerinde çalışır. Taslak üretmek
-için bir model ve onu yöneten ajan gerekir. Ajanın `SKILL.md` ve referansları
+Metin, hesap ve analiz araçları model çağırmadan yerel dosyalar üzerinde çalışır.
+Yerel açıklama adaptörü ayrıca Ollama üzerinden model çağırır. Genel taslak
+işleri için bir model ve onu yöneten ajan gerekir. Ajanın `SKILL.md` ve referansları
 okuyabilmesi, dosyalarla çalışabilmesi ve Python 3.10+ komutlarını çalıştırabilmesi
 tam akış için gereklidir. Yalnızca sohbet eden modellerde talimatlar kullanılabilir;
 komutlar kullanıcı tarafından çalıştırılır ve sonuçlar modele geri verilir.
@@ -92,10 +93,10 @@ birlikte bulunması gerekir. Yalnızca `SKILL.md` kopyalamak yeterli değildir.
 
 ## Yerel ve açık ağırlıklı modeller
 
-Ollama veya llama.cpp gibi bir çalıştırıcının üstünde, yukarıdaki dosya/Python
-yeteneklerini sağlayan bir ajanla ortak çekirdek kullanılabilir. Bu sürüm böyle
-bir çalıştırıcı kurmaz, model indirmez ve sağlayıcı API adaptörü içermez.
-Yerel modelle uçtan uca davranış henüz doğrulanmış değildir. Kurulum ve Python
-testlerinin geçmesi her modelin Türkçe içerik veya araç kullanımında aynı kaliteyi
-vereceği anlamına gelmez. Gerçek model desteği iddiasından önce aynı senaryoyu,
-hesap izolasyonunu ve araç sonuçlarının doğru yorumlanmasını o ortamda sınayın.
+Ollama için [sınırlı yerel açıklama akışı](local-model.tr.md) artık pakete dahildir:
+hesap bağlamını ve beceri talimatlarını modele verir, bir taslak üretir ve Python
+metin denetimlerini çalıştırır. Yerel sunucuyu kurmaz veya model indirmez.
+Bu akış genel ajan veya otonom araç kullanımı değildir. llama.cpp ve diğer
+sağlayıcı adaptörleri henüz dahil değildir. Kurulum ve Python testlerinin geçmesi
+her modelin Türkçe içerik veya araç kullanımında aynı kaliteyi vereceği anlamına
+gelmez. Her model için canlı teknik doğrulamayı ve çıktı incelemesini ayrı yapın.

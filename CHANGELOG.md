@@ -3,6 +3,14 @@
 Versions below describe development milestones in this fork. An entry is not
 proof that a corresponding GitHub Release or tag has been published.
 
+## [1.14.0] — bounded local model workflow
+
+- Add a standard-library Ollama adapter for explicitly selected, already installed local models.
+- Resolve one account's voice/strategy, load caption/human instructions, generate one draft and run the existing cleanup/lint tools.
+- Record model digest, input hashes, raw response, draft hashes, timings and required manual review; preserve failed/incomplete run receipts.
+- Add offline transport/workflow tests and an opt-in live validation using two fictional accounts and a fresh generic installation.
+- Limit the first live integration to caption drafting; no autonomous tool calls, model downloads, account mutation or publishing in the runner.
+
 ## [1.13.0] — host-independent core
 
 - Read core package identity/version from `instagram-agent.json`, independently of Claude plugin metadata.

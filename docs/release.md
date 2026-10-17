@@ -1,6 +1,6 @@
 # Release preparation
 
-The prepared version is **1.13.0**. This document describes producing a local
+The prepared version is **1.14.0**. This document describes producing a local
 candidate and a later publication procedure. Preparing a PR, ZIP or CI artifact
 does not publish a GitHub Release or tag.
 
@@ -26,14 +26,14 @@ verifies technical integration, not real account performance or model creativity
 
 ```bash
 python3 scripts/package_release.py --out /path/to/new-release
-python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.13.0.zip
+python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.14.0.zip
 ```
 
 The output contains:
 
 | File | Purpose |
 | --- | --- |
-| `instagram-agent-skill-1.13.0.zip` | Source, installer, all skills/assets, docs, tests and fictional examples |
+| `instagram-agent-skill-1.14.0.zip` | Source, installer, all skills/assets, docs, tests and fictional examples |
 | `release-manifest.json` | Version, source commit, skill list and per-file SHA-256 inventory; also inside the ZIP as RELEASE-MANIFEST.json |
 | `SHA256SUMS` | SHA-256 for the ZIP and external manifest |
 

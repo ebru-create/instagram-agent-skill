@@ -1,5 +1,9 @@
 # Uçtan uca yerel doğrulama
 
+Bu sayfa sabit örneklerle Python iş akışını açıklar. Gerçek bir yerel modelden
+iki hesap için açıklama üretmek isteyenler ayrı
+[Ollama doğrulama rehberini](../docs/local-model.tr.md) kullanmalıdır.
+
 Bu senaryo, yeni kurulmuş paket üzerinde şu zinciri çalıştırır:
 
 **Hesap → plan örneği → Türkçe açıklama kontrolleri → iki karusel → kurgusal

@@ -17,6 +17,16 @@ It delegates to the existing tools with explicit account/language parameters.
 JSON mode preserves original machine outputs; unsupported scores remain N/A and
 review warnings must not be treated as approval. Original commands still work.
 
+For explicitly requested local-model caption drafting, `local_model.py` in this
+folder connects to an already installed local Ollama model, supplies this account's
+voice/strategy and caption/human instructions, then runs the existing text tools.
+Use `--help` for doctor/caption options. Require an explicit account, model, brief
+and new output directory; the runner does not download models or publish. Its
+`draft_created_needs_review` status and exit 0 are technical completion, not
+editorial approval. Inspect `report.json`, `draft.raw.txt` and `draft.txt`; model
+facts, language and instruction-following need human review. Generic planning,
+Reels and autonomous model tool use are outside this first caption adapter.
+
 ## Content language
 
 Use the language explicitly requested for this content, then the selected

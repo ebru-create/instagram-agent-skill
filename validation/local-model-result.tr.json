@@ -1,0 +1,137 @@
+{
+  "kind": "synthetic-live-local-model-check",
+  "status": "passed_with_manual_review",
+  "manual_review_required": true,
+  "checks": [
+    "fresh generic installation + 13 smoke checks",
+    "two real local model requests with distinct profile hashes",
+    "both outputs cleaned and linted in Turkish",
+    "no other-account marker in either output",
+    "unknown account rejected before output creation"
+  ],
+  "outputs": [
+    {
+      "account": "ornek_atolye",
+      "draft_sha256": "66a85d15047d8d949d2b4b7ff76bcda8799617e07af4c082ef3f72c9873d7101",
+      "caption_verdict": "REVIEW",
+      "detect_verdict": "PASS",
+      "raw_caption": "Bir sonraki gün için tek öncelik yazmayı öner. Ajanda boşken kalemle başla.",
+      "clean_caption": "Bir sonraki gün için tek öncelik yazmayı öner. Ajanda boşken kalemle başla.\n",
+      "timing": {
+        "total_duration": 6586497791,
+        "load_duration": 1061341791,
+        "prompt_eval_count": 3721,
+        "eval_count": 36
+      },
+      "generation_options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_ctx": 8192,
+        "num_predict": 500
+      },
+      "thinking": false,
+      "runner_sha256": "a0f885360bb91e8852438dc5dc035377d8df6d59cf0d857a4ec28969b73efa52",
+      "input_sha256": {
+        "ornek_atolye.brief.txt": "19375ff8646233cf18cd9ef2425e34c0f53012b1678506a3e42f1e5ba56a5d85",
+        "installed/ig-caption/SKILL.md": "66aaf056716bc896eb10c0e62bca35b28af6c9fc9b158644bb86505580bc0443",
+        "installed/ig-human/SKILL.md": "8099ce0558f319813231f607e36d68c215918a715bf44a8602245cd0ff3a9793",
+        "accounts-data/accounts/ornek_atolye/voice.md": "041e15d4ce1dc40d7f335989f55196b216ac897fa612812b2496a6f1ea932067",
+        "accounts-data/accounts/ornek_atolye/strategy.md": "9894d074be6afae033a8063d5ed8b7f36187bf7a0e55d2c749f47f9ffd21600f"
+      },
+      "tool_scripts_sha256": {
+        "humanize": "f7879668fb2d28337ca39815649f2a24617d7eaa9b539daeb3e269a384309fbc",
+        "detect": "9cd176d878e734287372d956dc9f2262f3bad5d7c795ebcda0597be35b96f69c",
+        "caption": "1ac1f4f25160114de8b5ef8a5608c530e4006e494727fb7d800b947dfffa2d82"
+      },
+      "lexicon_sha256": "43c598f8d749a935db287425462e0fe34ad6678c6e106298601b62bf94378a3f"
+    },
+    {
+      "account": "ornek_seramik",
+      "draft_sha256": "7bc9faf95ca448fb1d0af9c31bf2dea014db7afe95502a6129186f20ad7a884a",
+      "caption_verdict": "REVIEW",
+      "detect_verdict": "PASS",
+      "raw_caption": "Seramik taslağınız hangisi? Düz veya çizgili? Yorumda seçiminizi belirtin.",
+      "clean_caption": "Seramik taslağınız hangisi? Düz veya çizgili? Yorumda seçiminizi belirtin.\n",
+      "timing": {
+        "total_duration": 6619444167,
+        "load_duration": 1056498625,
+        "prompt_eval_count": 3724,
+        "eval_count": 37
+      },
+      "generation_options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_ctx": 8192,
+        "num_predict": 500
+      },
+      "thinking": false,
+      "runner_sha256": "a0f885360bb91e8852438dc5dc035377d8df6d59cf0d857a4ec28969b73efa52",
+      "input_sha256": {
+        "ornek_seramik.brief.txt": "dcbf2bdd9c49029cc9b79e933547d3bb7f37489d98ad6ecc3e56b3e8e2f0e34c",
+        "installed/ig-caption/SKILL.md": "66aaf056716bc896eb10c0e62bca35b28af6c9fc9b158644bb86505580bc0443",
+        "installed/ig-human/SKILL.md": "8099ce0558f319813231f607e36d68c215918a715bf44a8602245cd0ff3a9793",
+        "accounts-data/accounts/ornek_seramik/voice.md": "9da973cac8b853b56a7756828647c59189542102c8d660e56266975376e6f3bb",
+        "accounts-data/accounts/ornek_seramik/strategy.md": "b0eac1e977833ec529947c074dcaa107953470bd5b5ea5c5873d03bc1e604a5e"
+      },
+      "tool_scripts_sha256": {
+        "humanize": "f7879668fb2d28337ca39815649f2a24617d7eaa9b539daeb3e269a384309fbc",
+        "detect": "9cd176d878e734287372d956dc9f2262f3bad5d7c795ebcda0597be35b96f69c",
+        "caption": "1ac1f4f25160114de8b5ef8a5608c530e4006e494727fb7d800b947dfffa2d82"
+      },
+      "lexicon_sha256": "43c598f8d749a935db287425462e0fe34ad6678c6e106298601b62bf94378a3f"
+    }
+  ],
+  "limitations": [
+    "Two fictional caption scenarios, not a quality benchmark.",
+    "No model-generated tool calls or autonomous file access are tested.",
+    "Editorial scores do not establish factual accuracy or business outcomes."
+  ],
+  "model": {
+    "name": "qwen3:4b",
+    "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "details": {
+      "parent_model": "",
+      "format": "gguf",
+      "family": "qwen3",
+      "families": [
+        "qwen3"
+      ],
+      "parameter_size": "4.0B",
+      "quantization_level": "Q4_K_M",
+      "context_length": 262144,
+      "embedding_length": 2560
+    },
+    "capabilities": [
+      "completion",
+      "tools",
+      "thinking"
+    ],
+    "license_sha256": "d18a5cc71b84bc4af394a31116bd3932b42241de70c77d2b76d69a314ec8aa12",
+    "server_version": "0.35.1",
+    "base_url": "http://127.0.0.1:11434"
+  },
+  "validation_date": "2026-10-17",
+  "environment": {
+    "architecture": "arm64",
+    "memory_gib": 64,
+    "python": "3.14.2"
+  },
+  "initial_failures": [
+    {
+      "model": "aya:latest",
+      "protocol": "free text",
+      "result": "rejected_truncated_output",
+      "observation": "Rephrased instructions instead of writing a caption; 500-token limit reached."
+    },
+    {
+      "model": "qwen3:4b",
+      "protocol": "free text",
+      "result": "rejected_truncated_output",
+      "observation": "Explained steps instead of returning a caption; 500-token limit reached."
+    }
+  ],
+  "manual_review": {
+    "ornek_atolye": "Turkish and topic-related, but partly repeats a brief instruction and omits the requested save CTA. Rewrite before use.",
+    "ornek_seramik": "Turkish, on-topic, polite address and one comment CTA. The linter fails to recognize this valid Turkish CTA phrasing. Review wording manually."
+  }
+}
