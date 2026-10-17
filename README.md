@@ -163,6 +163,25 @@ the bundled `ig-account` folder; install all `ig-*` folders together.
 
 ## Turkish content
 
+For Turkish command names, help, summaries and common error guidance, use the
+optional shared entrypoint:
+
+```bash
+python3 skills/ig-account/turkce.py --help
+python3 skills/ig-account/turkce.py aciklama caption.txt --kelimeler "atölye,uygulama"
+python3 skills/ig-account/turkce.py hesap listele
+python3 skills/ig-account/turkce.py analiz insights.csv --hesap YOUR_HANDLE --olcut paylasim_orani
+```
+
+It covers accounts, the six text/research tools, carousel export, analytics,
+experiments and publication records. Interface text is Turkish; content defaults
+to Turkish and `--dil en` selects English content. Percentages and percentage-point
+differences are labelled; cohort separation, missing data and review warnings stay
+visible. `--json` passes through original payloads and exit codes; `--ayrinti`
+shows original technical diagnostics, which may be English. Unknown errors get
+Turkish guidance to inspect those diagnostics. Existing CLIs/defaults are unchanged.
+See the [Turkish usage guide](skills/ig-account/references/turkce-kullanim.md).
+
 The six text tools support explicit `--language tr`; English remains the CLI
 default. All skill workflows pass the content language from the request or the
 selected account's voice profile. Add language, audience locale/timezone and
@@ -193,8 +212,8 @@ stay unclassified. The English hook benchmark AUC does not validate Turkish
 scores. All scores remain editorial heuristics, and speaking time is an estimate;
 use your measured speaking rate with `--wpm`.
 
-These are content-language improvements; command names and most diagnostic
-labels remain English. Mixed-language statistical scoring and full Turkish
+The original individual CLIs keep English command names and diagnostic labels;
+the optional entrypoint above provides Turkish summaries. Mixed-language statistical scoring and full Turkish
 morphological analysis are not implemented. Research counts still require full
 integers or the documented English K/M/B notation; convert Turkish display
 abbreviations to full integers instead of guessing their magnitude.

@@ -281,6 +281,16 @@ class InstalledBundleIntegrationTests(unittest.TestCase):
             report = json.loads(result.stdout)
             self.assertEqual(report["matched"][0]["post_id"], "fictional-1")
             self.assertEqual(report["identity_conflicts"], [])
+            result = cli(str(destination / "ig-account/turkce.py"), "yayin", "eslestir",
+                         str(destination / "ig-audit/example.synthetic.csv"),
+                         "--hesap", "ornek_studyo", "--kok", str(data_root), cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("Eşleşen yayın: 1", result.stdout)
+            result = cli(str(destination / "ig-account/turkce.py"), "yayin", "eslestir",
+                         str(destination / "ig-audit/example.synthetic.csv"),
+                         "--hesap", "ornek_studyo", "--kok", str(data_root), "--json", cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), report)
 
     def test_cli_flags_reject_ambiguous_replacement(self):
         with tempfile.TemporaryDirectory() as directory:
