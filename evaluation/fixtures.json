@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "id": "authored-hook-pipeline-fixtures-v1",
+    "kind": "fixture",
+    "split": "development",
+    "task": "Exercise scoring, grouping and abstention reporting on authored examples; not predict engagement.",
+    "positive_label": "1 = authored example intended to contain a concrete opening idea; 0 = authored generic introduction. These are subjective fixture labels, not observed outcomes.",
+    "provenance": "Twelve synthetic examples authored for this repository by Codex during evaluation-tool development. Account names are fictional grouping identifiers. No text, metrics or labels were collected from Instagram or YouTube.",
+    "usage_rights": "Repository-authored examples distributed under this repository's MIT license."
+  },
+  "rows": [
+    {"id": "en-a-1", "account": "fixture-en-a", "language": "en", "hook": "I lost two weekends to one missing checklist.", "label": 1, "expected_formula": 1},
+    {"id": "en-a-2", "account": "fixture-en-a", "language": "en", "hook": "Nobody tells you why your first three workshops feel rushed.", "label": 1, "expected_formula": 3},
+    {"id": "en-a-3", "account": "fixture-en-a", "language": "en", "hook": "Hello everyone and welcome back to another video.", "label": 0, "expected_formula": null},
+    {"id": "en-b-1", "account": "fixture-en-b", "language": "en", "hook": "Your briefing call has three questions nobody answers.", "label": 1},
+    {"id": "en-b-2", "account": "fixture-en-b", "language": "en", "hook": "I wanted to talk about a few things today.", "label": 0, "expected_formula": null},
+    {"id": "en-b-3", "account": "fixture-en-b", "language": "en", "hook": "Today I am going to introduce the topic.", "label": 0, "expected_formula": null},
+    {"id": "tr-a-1", "account": "fixture-tr-a", "language": "tr", "hook": "Bir eksik liste yüzünden iki hafta sonu kaybettim.", "label": 1, "expected_formula": 1},
+    {"id": "tr-a-2", "account": "fixture-tr-a", "language": "tr", "hook": "Kimse sana ilk üç atölyenin neden zor geldiğini söylemiyor.", "label": 1, "expected_formula": 3},
+    {"id": "tr-a-3", "account": "fixture-tr-a", "language": "tr", "hook": "Merhaba arkadaşlar bugün sizlere bir konuyu anlatacağım.", "label": 0, "expected_formula": null},
+    {"id": "tr-b-1", "account": "fixture-tr-b", "language": "tr", "hook": "Senin teklifinde üç sorunun yanıtı eksik.", "label": 1},
+    {"id": "tr-b-2", "account": "fixture-tr-b", "language": "tr", "hook": "Bugün bazı konular hakkında konuşmak istiyorum.", "label": 0, "expected_formula": null},
+    {"id": "tr-b-3", "account": "fixture-tr-b", "language": "tr", "hook": "Selam herkese bu videoda konuya giriş yapacağız.", "label": 0, "expected_formula": null}
+  ]
+}

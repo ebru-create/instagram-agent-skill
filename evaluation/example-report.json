@@ -1,0 +1,217 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "id": "authored-hook-pipeline-fixtures-v1",
+    "kind": "fixture",
+    "split": "development",
+    "task": "Exercise scoring, grouping and abstention reporting on authored examples; not predict engagement.",
+    "positive_label": "1 = authored example intended to contain a concrete opening idea; 0 = authored generic introduction. These are subjective fixture labels, not observed outcomes.",
+    "provenance": "Twelve synthetic examples authored for this repository by Codex during evaluation-tool development. Account names are fictional grouping identifiers. No text, metrics or labels were collected from Instagram or YouTube.",
+    "usage_rights": "Repository-authored examples distributed under this repository's MIT license."
+  },
+  "limitations": [
+    "Descriptive metrics only; no causal or view-prediction claim.",
+    "Fixture labels test the pipeline, not real-world performance.",
+    "No confidence intervals estimated. Small, selected or tuned datasets can mislead.",
+    "Pooled AUROC may reflect account differences; review within-account results.",
+    "Classification coverage is not annotation agreement or accuracy."
+  ],
+  "reproducibility": {
+    "dataset_sha256": "cd6a4e66710cd640f100ff53a3b87b47dac147446f1c68f2bcbe550317db26cd",
+    "python": "3.14.2",
+    "source_sha256": {
+      "evaluation/evaluate.py": "50e2f1e0816d469a6788e5735e0fba3eb68bca63d080011838d6a236def07459",
+      "skills/ig-reel/hookscore.py": "99a86a63ea046ec4f51f4026d40e33808fe0bfc2218e78f46360d217ab80bac0",
+      "skills/ig-viral/swipe.py": "4701c08d23abbd7c2b95b3bf04e79f8a7e6c256c6f2dc6a73bf8ee7f83cfb0bb",
+      "skills/ig-account/ig_language.py": "c9d072ecfd4fe9e7165737159691365fd573506f988ff464a23fe882894f8c36",
+      "skills/ig-reel/hooks.json": "147230762fd9e17cf58302913cb97069b3a3c7edae211b3b0196c180adf1412f",
+      "skills/ig-reel/hooks.tr.json": "b6b308808b77105bc9abffd89af513f145a603adef1481f8c18bfbd58870ed6f"
+    }
+  },
+  "by_language": {
+    "en": {
+      "n": 6,
+      "positive_n": 3,
+      "negative_n": 3,
+      "pooled_auc": 1.0,
+      "within_account_macro_auc": 1.0,
+      "evaluable_accounts": 2,
+      "total_accounts": 2,
+      "by_account": [
+        {
+          "account": "fixture-en-a",
+          "n": 3,
+          "positive_n": 2,
+          "auc": 1.0
+        },
+        {
+          "account": "fixture-en-b",
+          "n": 3,
+          "positive_n": 1,
+          "auc": 1.0
+        }
+      ],
+      "classification": {
+        "classified_n": 1,
+        "coverage": 0.16666666666666666,
+        "abstained_n": 5,
+        "annotated_n": 5,
+        "exact_annotation_agreement": 0.8,
+        "classified_annotated_n": 1,
+        "agreement_when_classified": 1.0
+      }
+    },
+    "tr": {
+      "n": 6,
+      "positive_n": 3,
+      "negative_n": 3,
+      "pooled_auc": 1.0,
+      "within_account_macro_auc": 1.0,
+      "evaluable_accounts": 2,
+      "total_accounts": 2,
+      "by_account": [
+        {
+          "account": "fixture-tr-a",
+          "n": 3,
+          "positive_n": 2,
+          "auc": 1.0
+        },
+        {
+          "account": "fixture-tr-b",
+          "n": 3,
+          "positive_n": 1,
+          "auc": 1.0
+        }
+      ],
+      "classification": {
+        "classified_n": 2,
+        "coverage": 0.3333333333333333,
+        "abstained_n": 4,
+        "annotated_n": 5,
+        "exact_annotation_agreement": 1.0,
+        "classified_annotated_n": 2,
+        "agreement_when_classified": 1.0
+      }
+    }
+  },
+  "scored_rows": [
+    {
+      "id": "en-a-1",
+      "language": "en",
+      "label": 1,
+      "account": "fixture-en-a",
+      "score": 77.8,
+      "verdict": "STRONG",
+      "predicted_formula": null,
+      "expected_formula": 1
+    },
+    {
+      "id": "en-a-2",
+      "language": "en",
+      "label": 1,
+      "account": "fixture-en-a",
+      "score": 87.0,
+      "verdict": "STRONG",
+      "predicted_formula": 3,
+      "expected_formula": 3
+    },
+    {
+      "id": "en-a-3",
+      "language": "en",
+      "label": 0,
+      "account": "fixture-en-a",
+      "score": 20.4,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    },
+    {
+      "id": "en-b-1",
+      "language": "en",
+      "label": 1,
+      "account": "fixture-en-b",
+      "score": 62.199999999999996,
+      "verdict": "OK",
+      "predicted_formula": null
+    },
+    {
+      "id": "en-b-2",
+      "language": "en",
+      "label": 0,
+      "account": "fixture-en-b",
+      "score": 24.599999999999998,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    },
+    {
+      "id": "en-b-3",
+      "language": "en",
+      "label": 0,
+      "account": "fixture-en-b",
+      "score": 24.599999999999998,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    },
+    {
+      "id": "tr-a-1",
+      "language": "tr",
+      "label": 1,
+      "account": "fixture-tr-a",
+      "score": 75.25,
+      "verdict": "STRONG",
+      "predicted_formula": 1,
+      "expected_formula": 1
+    },
+    {
+      "id": "tr-a-2",
+      "language": "tr",
+      "label": 1,
+      "account": "fixture-tr-a",
+      "score": 81.4,
+      "verdict": "STRONG",
+      "predicted_formula": 3,
+      "expected_formula": 3
+    },
+    {
+      "id": "tr-a-3",
+      "language": "tr",
+      "label": 0,
+      "account": "fixture-tr-a",
+      "score": 0.0,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    },
+    {
+      "id": "tr-b-1",
+      "language": "tr",
+      "label": 1,
+      "account": "fixture-tr-b",
+      "score": 55.4,
+      "verdict": "OK",
+      "predicted_formula": null
+    },
+    {
+      "id": "tr-b-2",
+      "language": "tr",
+      "label": 0,
+      "account": "fixture-tr-b",
+      "score": 20.25,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    },
+    {
+      "id": "tr-b-3",
+      "language": "tr",
+      "label": 0,
+      "account": "fixture-tr-b",
+      "score": 0.0,
+      "verdict": "WEAK",
+      "predicted_formula": null,
+      "expected_formula": null
+    }
+  ]
+}

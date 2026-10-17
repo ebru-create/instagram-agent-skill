@@ -341,53 +341,39 @@ SWIPE FILE  ·  4 reels  ·  4 accounts  ·  baseline: account median
            "in this video I am going to show you my morning routine"
 ```
 
-## What I actually measured, which is the part worth reading
+## Reproducible evaluation
 
-I did not want to publish a hook scorer on the claim that it feels right, so I
-tested it. The corpus is **74 real short-form hooks**: the first three seconds
-of the auto-caption track from the top eight and bottom eight performing shorts
-on each of five channels, view counts from 931 to 550,000.
+Run a local evaluation with explicit labels and dataset provenance:
 
-They are YouTube Shorts rather than Reels, because Instagram does not hand you
-view counts you can collect without logging into somebody's account, and
-scraping it would violate the Terms this repo tells you not to violate. The
-hook grammar is the same and the sourcing is public. That is a real limitation
-and it is stated here rather than buried.
+```bash
+python3 evaluation/evaluate.py evaluation/fixtures.json --out /tmp/hook-report.json
+```
 
-**Three results, two of them uncomfortable:**
+The runner reports AUROC separately for English and Turkish, pooled and within
+account, plus formula coverage, abstentions and annotation agreement with their
+sample counts. Tied scores receive half credit. Missing class pairs or missing
+annotations produce `null` metrics instead of invented accuracy. Dataset and
+source-file hashes plus the Python version make a run traceable.
 
-**1. It catches bad hooks well.** Against ten hooks written deliberately badly,
-AUC 0.83, and nine of the ten scored below the median of the real corpus. If
-your hook opens on a greeting, a preamble or nothing concrete, this tells you.
+The bundled 12 examples are synthetic development fixtures authored for this
+repository. They test the pipeline and language routing; they are not observed
+Instagram results, a held-out benchmark or independent validation. High fixture
+scores do not establish real-world quality or performance. See the
+[evaluation guide](evaluation/README.md), [dataset](evaluation/fixtures.json)
+and [sample report](evaluation/example-report.json). CI publishes fresh fixture
+reports for each supported Python version without a performance-score gate.
 
-**2. It does not pick winners.** Separating a good creator's hits from that
-same creator's misses: **AUC 0.56, where 0.50 is a coin flip.** Of the five
-checks, only SPECIFICITY separated the bands meaningfully, by 60 points of
-median. STAKES and ADDRESS had identical medians in both bands, which means on
-this corpus they measured nothing.
+The upstream README reported a 74-hook YouTube Shorts corpus, AUROC 0.83 for
+separating deliberately weak examples from real hooks, AUROC 0.56 for hits versus
+misses, and formula coverage increasing from 8% to 49%. The original corpus and
+measurement script are absent from this repository. Those are historical
+upstream claims, not reproduced results for this fork's changed code or Turkish
+support. The synthetic fixtures do not recover that missing evidence.
 
-So the honest use is: kill the obviously weak hooks before you shoot them, then
-trust your own retention graph. Nothing that reads text can tell you which of
-two decent hooks will travel, because that is decided by your face, your edit,
-your audio and who Instagram shows it to.
-
-**3. The formula classifier was broken and the test is what caught it.** The
-`match` regexes in `hooks.json` were written off my own templates, and they
-named **8%** of real hooks. People do not speak in templates. Rewriting them
-against actual transcribed speech took it to **49%**, and four formulas went
-into the set because they kept appearing and were not there: Contrarian Flip,
-The Statistic, The Reveal, Someone Else's Result, plus The Superlative. On the
-other 51% it abstains, which is correct: a lot of short-form is podcast clips
-that have no hook formula at all.
-
-One fixed bug worth naming: `SPECIFICITY` only counted digits, so "zero
-dollars" and "three marketing books" scored as having nothing concrete in them.
-Spoken hooks say their numbers out loud.
-
-If you re-run this on a bigger or cleaner corpus and get a different answer, I
-would rather know. The measurement script is not in the repo because it depends
-on `yt-dlp`, but the method is four lines and is written out in
-[`/ig-viral`](skills/ig-viral/SKILL.md).
+Use data you own or have permission to evaluate for a real study. Define the
+label, observation window and sampling protocol, freeze holdout data before
+tuning, and inspect account-level results. Text-only scores remain editorial
+heuristics, not view predictions or proof that a change caused an outcome.
 
 ## The fine print, which is the honest part
 
@@ -410,13 +396,11 @@ human speed, with you driving your own browser. It never asks for your password
 and never logs in as you. Automated collection at volume is the thing that gets
 accounts restricted, and a crawler is not what this is.
 
-**The five detection checks are local heuristics, not detector APIs.** They are
-modelled on the signals public detectors key on and they run entirely on your
-machine. They are not GPTZero, Originality, Copyleaks, Winston or Turnitin,
-they do not call those services, and they cannot promise those verdicts. Fixing
-what they measure tends to move those numbers, because they are measuring the
-same underlying things. That is the whole claim. Nobody can honestly sell you
-"undetectable", and anybody who does is selling you something.
+**The five detection checks are local editorial heuristics.** They run on your
+machine and do not call GPTZero, Originality, Copyleaks, Winston or Turnitin.
+No supplied evaluation establishes agreement with those services or shows that
+rewriting changes their verdicts. The scores are not evidence of human or AI
+authorship and cannot promise undetectability.
 
 **Unicode cleanup is conservative.** Joining and direction characters can
 carry meaning in emoji and languages. They are preserved, as are unlisted
@@ -451,6 +435,8 @@ skills/ig-viral/swipe.py           outlier ranking and formula classification
 skills/ig-profile/rubric.json      the 100-point profile score
 templates/voice.md                 your voice profile. Fill this in first.
 templates/strategy.md              confirmed goals, capacity and review criteria
+evaluation/evaluate.py            local hook metrics with provenance and source hashes
+evaluation/fixtures.json          synthetic English/Turkish pipeline examples
 ```
 
 ## Credit
