@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "instagram-agent-skill",
-  "description": "The Instagram agent skill pack for Claude",
+  "description": "Instagram planning, drafting and local review tools",
   "owner": {
     "name": "ebru-create",
     "url": "https://github.com/ebru-create"
@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "instagram-agent",
-      "description": "Fourteen Claude skills that run an Instagram account, including a scored hook panel, a viral research skill, a caption linter and a humanizer.",
+      "description": "Fourteen skills with separate account profiles, English/Turkish text tools, carousel export, CSV analytics and descriptive content experiments. Local files and drafts; no Instagram publishing client.",
       "source": "./",
       "category": "productivity",
       "homepage": "https://github.com/ebru-create/instagram-agent-skill"
