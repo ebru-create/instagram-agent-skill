@@ -249,6 +249,14 @@ class InstalledBundleIntegrationTests(unittest.TestCase):
             result = cli("scripts/install.py", "--skills-dir", str(destination), "--check", cwd=directory)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout)["status"], "ok")
+            result = cli(str(destination / "ig-audit/analyse.py"),
+                         str(destination / "ig-audit/example.synthetic.csv"),
+                         "--account", "ornek_studyo", "--primary-metric", "shares_per_reach",
+                         cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["post_count"], 4)
+            self.assertEqual(report["posts"][0]["relative_views"], .5)
 
     def test_cli_flags_reject_ambiguous_replacement(self):
         with tempfile.TemporaryDirectory() as directory:

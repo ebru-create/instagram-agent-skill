@@ -63,6 +63,15 @@ Drafts and approvals in `log` are not proof a post was published. Match results
 to published post IDs/URLs where supplied and keep planned versus observed data
 separate. Never fill missing results with zero or merge another brand's history.
 
+For supplied CSV data, use [the local CSV workflow](references/csv-analysis.md)
+and `analyse.py` for calculations. Map confirmed source fields to `template.csv`;
+native exports may need adaptation. Pass the publishing `--account` and a
+goal-aligned `--primary-metric`. Default output is read-only JSON; `--save` creates
+a fresh account-specific snapshot, preserving previous reports and `results.md`.
+Read coverage and limitations before interpreting the numbers. Explain the JSON
+in the user's language; its keys are stable English identifiers. The bundled
+`example.synthetic.csv` is fictional and must never substitute for account data.
+
 ## Calculate only supported measures
 
 Choose a primary metric aligned to the goal and available data. Use other

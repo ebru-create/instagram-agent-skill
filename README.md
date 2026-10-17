@@ -432,6 +432,32 @@ layout supports Latin-script English/Turkish text; it is not a general
 multilingual typesetting engine or an AI image generator. Inspect every draft
 before posting and enter the supplied alt text in your publishing workflow.
 
+## Local account analytics
+
+`ig-audit/analyse.py` calculates rates and comparable peer baselines from a
+user-mapped CSV. No login, network calls or additional Python packages are needed.
+It requires an explicit account and primary metric:
+
+```bash
+python3 skills/ig-audit/analyse.py skills/ig-audit/example.synthetic.csv --account ornek_studyo --primary-metric shares_per_reach
+```
+
+The sample is fictional. Start real work with `skills/ig-audit/template.csv`;
+native Instagram/Meta exports need mapping to this schema. Blank values stay
+unknown; zero denominators give `null`. Rates include shares, saves and follows
+per reach, non-follower reach and supported 3-second reel retention.
+
+Comparisons separate format, organic/paid distribution and exact measurement age.
+Relative views use other posts in the same cohort, with peer count disclosed.
+Reports include coverage, input SHA-256 and interpretation limits. They describe
+associations and do not diagnose causes or automatically attribute sales.
+
+Default output is JSON. With an initialized account, `--save` writes a fresh
+`accounts/HANDLE/audits/audit-UUID/report.json` under the account root; `--root`
+selects a custom root. Prior snapshots and `results.md` are preserved. Explain
+findings in English or Turkish through `/ig-audit`, then hand them to `/ig-plan`.
+See the [CSV contract and interpretation guide](skills/ig-audit/references/csv-analysis.md).
+
 ## Reproducible evaluation
 
 Run a local evaluation with explicit labels and dataset provenance:
