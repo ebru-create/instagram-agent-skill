@@ -1,9 +1,9 @@
 ---
 name: ig-human
 description: >-
-  Strip the machine fingerprint out of any draft - em dashes, AI slop words,
-  copy-paste artefacts - and score it against a five-check detection
-  panel before it goes out. Use whenever text needs to sound human, when the
+  Clean stock phrases and copy-paste artefacts from a draft, with optional
+  punctuation normalization and a panel of local editorial signals. Use whenever
+  text needs to sound human, when the
   user says humanize, "does this sound like AI", "remove the em dashes",
   "de-slop this", "this sounds like ChatGPT", or before any caption, script,
   comment, reply or DM is shown to the user.
@@ -131,13 +131,12 @@ not establish human authorship.
 
 ## Say this honestly
 
-These are five local heuristics modelled on the signals public detectors key
-on. They run entirely on the user's machine and nothing is uploaded. They are
-**not** GPTZero, Originality, Copyleaks, Winston or Turnitin, they do not call
-those APIs, and they cannot promise those verdicts. Fixing what they measure
-does tend to move those numbers, because they are measuring the same underlying
-things. That is the claim. Do not make a bigger one on the user's behalf, and
-do not tell a user their text is undetectable.
+These are local editorial heuristics, not validated authorship detection.
+They run entirely on the user's machine without uploading text or calling
+GPTZero, Originality, Copyleaks, Winston or Turnitin. No supplied evaluation
+establishes agreement with those services or predicts changes in their verdicts.
+Do not present a score as proof of authorship, detector performance or
+undetectability. Review edits against the user's meaning and voice.
 
 ## Order of operations
 

@@ -8,18 +8,14 @@ alone. They measure properties that hooks which hold attention tend to share -
 a length you can say in under three seconds, a concrete marker, something at stake,
 the payload at the front rather than the back, and a viewer to aim it at.
 
-What this is NOT:  a view predictor. It was tested against 74 real short-form
-hooks, transcribed from the first three seconds of the top eight and bottom
-eight performers on five channels. Separating a real hook from a deliberately
-bad one it does well: AUC 0.83, and 9 of 10 written-to-be-bad hooks scored
-below the real median. Separating a good creator's hits from that same
-creator's misses it barely does at all: AUC 0.56, where 0.50 is a coin flip.
-
-So use it for what it measured well. It catches greetings, preambles, hooks
-with nothing concrete in them and hooks that take five seconds to say. It will
-not tell you which of two decent hooks will travel, and nothing that reads text
-can, because that is decided by your face, your edit, your audio and who
-Instagram shows it to. Trust the retention graph over this script.
+What this is NOT: a view predictor or a validated measure of hook quality.
+The original upstream reported a 74-hook corpus and AUROC results, but its raw
+data and measurement script are absent. Those historical claims are not
+reproduced for this fork's modified scorer or Turkish support. See
+../../evaluation/README.md for the local evaluation runner and limitations.
+The bundled synthetic fixtures only exercise the pipeline. Use independently
+labelled, comparable data before making a performance claim, and review actual
+retention/outcomes rather than treating the text score as a causal explanation.
 
 Each check returns 0 to 100. Higher is better.
 

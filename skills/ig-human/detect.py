@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """
-detect.py - a five-check panel that scores how machine-written a draft looks.
+detect.py - a five-check panel of local editorial signals.
 
-What this is:  five local heuristics modelled on the signals public AI
-detectors actually measure - sentence-length variation, concreteness, stock
-vocabulary, typographic fingerprint, and voice. Every score is computed on
-your machine from the text alone. Nothing is uploaded.
+What this is: five local editorial heuristics for sentence-length variation,
+concreteness, stock vocabulary, typography and voice. Every score is computed
+on your machine from the text alone. Nothing is uploaded.
 
-What this is NOT:  GPTZero, Originality, Copyleaks, Winston or Turnitin.
-It does not call their APIs and it cannot promise their verdict. It catches
-the things they all key on, which is why fixing them tends to move their
-numbers too - but the only honest claim is the one on this line.
+This does not call external detector APIs. No supplied evaluation establishes
+agreement with those services or predicts how they react to rewrites. Scores
+are not evidence of human or AI authorship.
 
-Each check returns a HUMAN score from 0 to 100. Higher is better.
+Each applicable check returns 0 to 100; higher matches its editorial preference.
+The JSON field human_score is retained for compatibility, not an authorship claim.
 
 Usage
   python3 detect.py draft.txt
@@ -185,7 +184,7 @@ def bar(score, width=24):
 
 
 def render(results, overall, verdict, label=None, out=sys.stdout):
-    title = "AI DETECTION PANEL" + (f"  -  {label}" if label else "")
+    title = "EDITORIAL CHECK PANEL" + (f"  -  {label}" if label else "")
     print("\n" + title, file=out)
     print("=" * max(len(title), 62), file=out)
     for name in CHECKS:
@@ -195,7 +194,7 @@ def render(results, overall, verdict, label=None, out=sys.stdout):
         print(f"  {'':<13} {detail}", file=out)
     print("-" * 62, file=out)
     value = f"{overall:5.1f}" if overall is not None else "  N/A"
-    print(f"  {'HUMAN SCORE':<13} {bar(overall)} {value}   {verdict}", file=out)
+    print(f"  {'EDITORIAL SCORE':<13} {bar(overall)} {value}   {verdict}", file=out)
     applicable = [c for c in CHECKS if results[c][0] is not None]
     print(f"  Coverage: {len(applicable)}/{len(CHECKS)} checks. N/A checks are excluded.", file=out)
     if verdict not in ("PASS", "INSUFFICIENT TEXT"):
@@ -205,7 +204,7 @@ def render(results, overall, verdict, label=None, out=sys.stdout):
 
 
 def main():
-    ap = argparse.ArgumentParser(description="Score how machine-written a draft looks.")
+    ap = argparse.ArgumentParser(description="Report local editorial signals; not authorship detection.")
     ap.add_argument("input", nargs="?", default="-", help="file, or - for stdin")
     ap.add_argument("compare", nargs="?", help="second file, to show before/after")
     ap.add_argument("--json", action="store_true")
