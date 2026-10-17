@@ -1,0 +1,2 @@
+# Optional: only the PNG carousel exporter needs this package.
+Pillow>=11.3,<14
