@@ -1,0 +1,69 @@
+# Changes
+
+Versions below describe development milestones in this fork. An entry is not
+proof that a corresponding GitHub Release or tag has been published.
+
+## [1.12.0] — release preparation
+
+- Reorganize the README around the implemented workflow and current tool inventory.
+- Add Turkish quick start and walkthrough, installation/recovery notes and a release procedure.
+- Prepare deterministic source ZIPs from clean committed checkouts, with a per-file
+  release manifest, SHA-256 checksums and an archive verifier.
+- Test package integrity, exclusions, repeatability and installation from the extracted ZIP.
+- Align marketplace descriptions with actual local capabilities and preserve upstream credit.
+- Existing CLI names, JSON contracts and account data layouts are unchanged.
+
+## [1.11.0] — explicit CSV import
+
+Inspect source columns; map confirmed fields, numeric locale, dates and fixed
+UTC offset; preview conversion errors; export only validated canonical CSV to a
+new directory. Add Turkish import commands and end-to-end coverage.
+
+## [1.10.0] — Turkish command interface
+
+Add Turkish help, summaries, metric aliases and common error guidance through
+`turkce.py`, preserving delegated JSON and exit-code behavior.
+
+## [1.9.1] — end-to-end validation
+
+Replay a fictional Turkish workflow from a fresh installed bundle through
+exports, reported publications, analytics and experiment review, with failure paths.
+
+## [1.9.0] — publication records
+
+Separate user-reported publications from draft approvals; retain explicit
+corrections and reconcile post identities against supplied CSV.
+
+## [1.8.0] — content experiments
+
+Record test criteria/assignments and review comparable observations with visible
+missing data, dates and descriptive limits.
+
+## [1.7.0] — account CSV analytics
+
+Compute supported rates, coverage and self-excluded peer baselines from canonical CSV.
+
+## [1.6.0] — carousel export
+
+Generate numbered PNGs, captions, alt text, hashes and a review overview with
+font, layout and contrast checks; Pillow/font support is optional.
+
+## [1.5.0] — managed installation
+
+Install/check/update the complete pack with manifests, local-edit protection,
+backups, staged activation and caught-failure rollback.
+
+## [1.4.0] — reproducible evaluation
+
+Add explicit labelled fixtures, dataset/source hashes and per-language descriptive
+metrics; distinguish synthetic pipeline checks from real-world validation.
+
+## [1.3.0] — adaptive planning
+
+Plan against confirmed goals, capacity and evidence; separate observations from
+hypotheses and choose manageable review criteria.
+
+## Earlier work
+
+Reliability fixes, explicit account isolation and initial Turkish content support
+preceded these milestones. See repository history for their exact changes.
