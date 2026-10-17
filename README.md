@@ -26,6 +26,9 @@ No API key is required by these scripts. Your agent host's setup is separate.
 The core metadata is `instagram-agent.json`; Claude marketplace metadata is an
 optional host adapter. See [host-independent setup](docs/hosts.md) for Codex,
 Claude Code and generic agents using local/open-weight models.
+For a bounded local Ollama caption workflow, see the
+[Turkish local-model guide](docs/local-model.tr.md). It resolves one account,
+generates a draft and runs editorial tools; it does not provide an autonomous agent.
 
 ## Install
 
@@ -126,6 +129,7 @@ chat does not install their Python tools or shared resources.
 | Entrypoint | Purpose |
 | --- | --- |
 | `skills/ig-account/turkce.py` | Turkish commands, help, summaries and common errors |
+| `skills/ig-account/local_model.py` | Inspect a local Ollama model; generate, clean and lint one account's caption |
 | `skills/ig-account/account.py` | Account initialization, listing and paths |
 | `skills/ig-account/publication.py` | Record/revise reported publications; reconcile CSV identities |
 | `skills/ig-human/humanize.py` | Text cleanup with explicit content language |
@@ -182,6 +186,10 @@ localized CSV import, exports, records, audit and experiment review, plus failur
 paths and a second account. It does not evaluate an independent model's creative
 behavior or real account performance.
 
+The separate opt-in [live local-model check](docs/local-model.tr.md) generates
+captions for two fictional accounts through Ollama. It records actual model
+responses and editorial diagnostics; normal CI uses offline transport fixtures.
+
 [Evaluation](evaluation/README.md) records dataset/source hashes and descriptive
 metrics on explicit labels; bundled labels are synthetic pipeline fixtures.
 
@@ -189,7 +197,7 @@ From a clean committed checkout, prepare and verify a source ZIP:
 
 ```bash
 python3 scripts/package_release.py --out /path/to/new-release
-python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.12.0.zip
+python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.14.0.zip
 ```
 
 The [release guide](docs/release.md) describes the inventory, checksums and final
