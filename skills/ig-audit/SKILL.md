@@ -1,8 +1,8 @@
 ---
 name: ig-audit
 description: >-
-  Post-mortem on what the user has already posted - which reels actually
-  worked, why, and what to stop making. Use when the user pastes their
+  Analyze published Instagram content against the account’s goal, compare
+  supported metrics, state uncertainty and propose manageable next tests. Use when the user pastes their
   Instagram insights or past posts and asks "what's working", "why did this
   flop", "read my analytics", "audit my content", or wants to know what to do
   more of.
@@ -41,99 +41,103 @@ unless they use saved brand context. If the helper is unavailable, work from
 supplied text without saved context or filesystem writes; install the full pack
 for persistent profiles. See [account setup](../ig-account/SKILL.md).
 
-The only honest source of what works for an account is that account. Every
-rule in every Instagram guide, including the ones in this pack, is a prior.
-The user's own last 30 posts are the evidence.
+Explain what this account's available evidence supports, what remains unknown,
+and what to test next. An audit describes associations; it does not establish
+a cause merely because two groups differ.
 
-## Input
+## Scope and input
 
-Ask for whichever the user has:
+Read the resolved `strategy`, `log` and previous `results` paths when present.
+Use the user's current goal and period. If the goal is unknown, state what each
+available metric can describe and ask only when a ranked recommendation needs
+a goal choice. Do not silently rank a sales campaign by views.
 
-- Insights per post: views, reach, interactions, watch time, saves, shares,
-  follows, and the non-follower share of reach. Screenshots are fine.
-- Or the retention graph for their best and worst recent reels. This one
-  screenshot is worth more than the rest combined.
-- Or just the posts and their view counts, which is enough for a first pass.
+Use whichever evidence is available: Insights exports, screenshots, retention
+graphs, posts with view counts, or attributable enquiries/bookings. Record the
+source and capture date, the publishing account, number of usable posts and
+any missing fields. Confirm dates, format, organic/paid status and post age when
+those materially affect comparison. A partial dataset can support a limited
+first pass; it is not a complete account audit.
 
-Also read the resolved `log` path if it exists, since it records which
-hook formula each post used.
+Drafts and approvals in `log` are not proof a post was published. Match results
+to published post IDs/URLs where supplied and keep planned versus observed data
+separate. Never fill missing results with zero or merge another brand's history.
 
-## What to actually measure
+## Calculate only supported measures
 
-Raw views is the least useful number on the page, because it is mostly a
-function of how many people already follow the account. Compute these instead
-and show the working:
+Choose a primary metric aligned to the goal and available data. Use other
+metrics as diagnostics, without claiming one is universally strongest.
 
-| metric | how | what it tells you |
+| measure | calculation | interpretation and limit |
 | --- | --- | --- |
-| **Outlier multiple** | views / the account's own median views | whether this was a real hit or a normal day |
-| **Non-follower reach** | % of reach from people who do not follow | whether it travelled at all |
-| **Hold at 3s** | viewers still there at 3s / viewers who started | whether the hook worked. This is the hook's grade. |
-| **Average watch time** | straight from insights | whether the middle worked |
-| **Sends per reach** | shares / reach | the strongest single signal you can earn. A send is a person putting their name on it. |
-| **Follows per reach** | follows / reach | whether the profile converted the attention |
+| Relative views | post views / comparable account-median views | descriptive relative exposure; state baseline window and n |
+| Non-follower reach | reported proportion or non-follower reach / total reach | exposure beyond existing followers, not proof of qualified demand |
+| Hold at 3 seconds | remaining viewers at 3s / starting viewers | early retention; only if starts, retention and duration support it |
+| Average watch time | the reported duration with video length alongside it | can inform pacing; loops and length complicate cross-post comparisons |
+| Shares per reach | reported shares / reach | sharing activity; do not relabel total shares as private sends |
+| Saves or follows per reach | the corresponding count / reach | response/conversion diagnostic; preserve each metric's definition |
+| Qualified enquiries/bookings | attributable counts or counts / a stated matching denominator | relevant business outcome only when attribution and qualification are available |
 
-Rank by outlier multiple and sends per reach, not views. A reel with 4,000
-views and 90 sends beat the one with 60,000 views and 11.
+Show units and working for computed rates. Missing or zero denominators produce
+N/A, not zero, infinity or a claim of failure. Missing attribution remains
+unknown; do not allocate whole-account sales to individual posts. For videos
+shorter than three seconds, do not invent a 3-second retention measure.
+A zero baseline cannot produce an outlier multiple. A recent post with zero
+views may simply not have a comparable observation window yet.
 
-## Then find the pattern
+Use a disclosed, comparable baseline: similar format, post age/measurement
+window and organic/paid treatment where possible. State included/excluded posts
+and baseline n. Do not pool unrelated formats, promoted posts and fresh posts
+into a single winner ranking. When matching data is unavailable, show separate
+groups or raw observations and explain why a multiple/ranking is not supported.
+Views-only input supports exposure analysis, not claims about sends or bookings.
 
-With the top five and bottom five side by side, look for what separates them,
-and be willing to conclude something the user will not like:
+## Separate observation, explanation and next action
 
-- **Hold at 3 seconds.** If the top and bottom differ here, it is the hook and
-  nothing else, and everything downstream is a distraction.
-- **Hook formula.** Which ids from `ig-reel/hooks.json` are in the top five?
-- **Format.** Reel, carousel, single image.
-- **Length.** Group into under 15s, 15 to 30s, 30 to 60s, over 60s.
-- **Theme.**
-- **Whether the user replied to comments in the first hour.**
-- **Day and time.** Check this **last** and only if the others show nothing.
-  It is almost never the cause and it is where people want it to be.
+For each material finding, report:
 
-State the finding as a claim with the evidence attached, and say how confident
-it is. With 30 posts you can see a pattern. With 6 you cannot, and saying so is
-better than inventing one.
+1. Observation: the actual values, denominators, group sizes and window.
+2. Interpretation: a plausible explanation and confidence justified by the
+   comparability and completeness of the evidence.
+3. Alternatives/limits: topic, audience, offer fit, execution, distribution,
+   promotion, timing or other plausible differences that could explain it.
+4. Next test: a manageable change and the measure/window used to evaluate it.
 
-## The distinction that saves people months
+Do not use a universal post-count threshold to declare a pattern proven or
+meaningless. Small or unbalanced groups, one extreme post, missing metrics and
+selection of only winners reduce confidence. Name those limitations and avoid
+causal language. Show cohort medians or per-post values where helpful rather
+than letting one unusually large result dominate an average.
 
-**A reel that gets views and no follows is not a failed reel, it is a profile
-problem.** A reel that gets no views is a hook problem. Separate the two before
-recommending anything. If non-follower reach is high and follows per reach is
-low, stop rewriting hooks and go to `/ig-profile`.
+Low views alone do not diagnose a hook problem. High reach with few follows
+could reflect audience fit, the content promise, CTA or profile, among other
+factors. Compare the available funnel evidence before suggesting `/ig-profile`
+or `/ig-reel`. A retention gap does not rule out topic or first-frame effects.
+Timing may be worth a test when relevant; neither prioritize nor dismiss it by
+rule. If the evidence cannot distinguish explanations, say so.
 
-## Output
+## Output and handoff
+
+Show scope, goal/primary metric and data coverage before any rankings. Label
+rankings by the metric they use. Provide a small number of supported findings,
+each with evidence and limits, then one or a few feasible next experiments.
+Avoid blanket "stop this format" instructions based on a few observations.
+
+Illustrative finding (numbers are examples, never substitute them for user data):
 
 ```
-AUDIT  ·  31 posts  ·  Jun 12 - Sep 5  ·  median views 4,100
-
-TOP 5 BY OUTLIER MULTIPLE
-  18.2x  #3  Nobody Tells You   74,600 views  62% non-follower  hold@3s 71%  128 sends
-   6.4x  #1  Cost Confession    26,300 views  48% non-follower  hold@3s 64%   71 sends
-  ...
-
-BOTTOM 5
-   0.3x  #11 Numbered            1,200 views  9% non-follower   hold@3s 31%    2 sends
-  ...
-
-WHAT THE DATA SAYS
-1. Hold at 3 seconds is the whole story. Top five average 66%, bottom five 33%.
-   Everything else you are worried about is downstream of the first two seconds.
-2. The posts where you were the one who looked bad: mean 8.1x vs 0.9x for
-   everything else. n=5. Strongest signal here and it is not close.
-3. Tool listicles get views and nothing else. High reach, no sends, no follows.
-   Three of your bottom five.
-4. Day of week shows nothing. Your Tuesday and Friday means are inside the
-   noise. Stop optimising it.
-
-STOP: listicles.
-DO MORE: the ones with a cost you paid and a number attached.
+GÖZLEM: Aynı 7 günlük ölçümde iki içerik 40/2.000 ve 9/1.000 paylaşım/erişim
+aldı: %2,0 ve %0,9. İkisi de organik karusel; örneklem iki içerik.
+YORUM: İlk içerikte paylaşım oranı daha yüksek; nedenini henüz ayıramıyoruz.
+SINIR: Konular ve kapaklar farklı. Satış veya nitelikli başvuru verisi yok.
+SONRAKİ DENEME: Benzer konuda iki kapak yaklaşımı; ana ölçüt ve bütçe
+hesabın hedefiyle birlikte /ig-plan içinde belirlenecek.
 ```
 
-Then hand the conclusions to `/ig-plan` so next week is built on the user's own
-evidence rather than on defaults, and to `/ig-viral` so the swipe file gets
-filtered to the formulas that work for this account specifically.
-
-Save the completed audit to the resolved `results` path with the publishing
-account and date. Pass that same account to `/ig-plan`; never combine results
-from different publishing accounts unless the user requests a comparison.
+Save the completed audit to the resolved `results` path with account, goal,
+period, sources/capture dates, coverage, metric definitions, observations,
+hypotheses, uncertainties and review criteria. Preserve relevant prior findings
+and mark what this audit supersedes. Pass the same publishing account and
+supported findings to `/ig-plan`; optional `/ig-viral` research should explore
+hypotheses rather than filter out everything not already labelled a winner.
+Never combine publishing accounts unless the user explicitly requests comparison.

@@ -27,6 +27,10 @@ not validated performance predictions or AI-authorship detection.
 
 ## Account context
 
+For a slot from `/ig-plan`, preserve its publishing account, goal, time budget,
+post/frame count and camera constraints. These take precedence over this skill's
+generic format suggestions. Read the resolved `strategy` brief if needed.
+
 For account-specific work, resolve the user's publishing handle from the request
 or established conversation, not a research target or message recipient. Run
 `../ig-account/account.py show --account HANDLE` with Python from this skill's

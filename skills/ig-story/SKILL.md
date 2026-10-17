@@ -27,6 +27,10 @@ not validated performance predictions or AI-authorship detection.
 
 ## Account context
 
+For a slot from `/ig-plan`, preserve its publishing account, goal, time budget,
+post/frame count and camera constraints. These take precedence over this skill's
+generic format suggestions. Read the resolved `strategy` brief if needed.
+
 For account-specific work, resolve the user's publishing handle from the request
 or established conversation, not a research target or message recipient. Run
 `../ig-account/account.py show --account HANDLE` with Python from this skill's
@@ -46,13 +50,14 @@ how the people who already follow you decide whether you are a person worth
 buying from, and they are the only surface on Instagram where a tap turns into
 a conversation in one move.
 
-Nobody outside your followers sees these, so the job is completely different:
-depth, not reach.
+Use the account’s observed Story audience and current goal. Do not assume
+every viewer is a follower or that Stories have one universal job.
 
-## The daily shape
+## An optional sequence
 
-Three to seven frames a day. Beyond about seven, the tap-forward rate climbs
-and the last frames play to nobody, which is exactly where people put the ask.
+Choose a frame count and frequency that fit the agreed plan, assets and budget.
+One useful frame can be enough; there is no daily minimum. The following longer
+sequence is an option when the content warrants it, not a required template.
 
 ```
 1       THE OPEN     something happening today, with a face or a hand in it.
@@ -61,8 +66,8 @@ and the last frames play to nobody, which is exactly where people put the ask.
 5       THE CLOSE    the answer, the outcome, or tomorrow's setup.
 ```
 
-Put the ask at frame 4, not frame 7. Completion drops with every tap and the
-ask should be seen by the people who are still there.
+Put the intended action where it makes sense in the chosen sequence. Use the
+account’s completion data if available; do not invent an optimal frame number.
 
 ## The stickers, and what each is actually for
 
@@ -82,8 +87,8 @@ them to `/ig-reel` as formula #16.
 
 ## Rules
 
-- **A face or a hand in the first frame.** Text on a coloured background gets
-  tapped through, and the first frame decides whether the rest get watched.
+- **Choose a clear opening that fits the brand and available assets.** A face,
+  hand, illustration or text can be appropriate. Respect faceless constraints.
 - **One idea per frame.** Reading a paragraph on a story is not a thing anyone
   does.
 - **Keep text inside the middle.** On 1080x1920, nothing above y=250 or below
@@ -93,9 +98,9 @@ them to `/ig-reel` as formula #16.
 - **Do not repost your own feed post to stories with no comment.** It is the
   single most ignored frame on the platform. If you are pointing at a post, say
   what happened in the comments and why it is worth going back for.
-- **Sell on stories, not in posts.** Three frames of context, one frame of
-  offer, one frame of proof. That sequence sells more than a feed post about
-  the same thing and costs you no reach.
+- **Place an offer where it supports the agreed goal.** Context, offer and
+  proof can work as a sequence; do not claim it will outperform feed posts
+  without comparable account evidence.
 
 ## The DM funnel, done honestly
 
