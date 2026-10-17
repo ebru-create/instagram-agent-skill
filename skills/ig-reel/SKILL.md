@@ -11,6 +11,21 @@ description: >-
 
 # ig-reel
 
+## Content language
+
+Use the language explicitly requested for this content, then the selected
+account's voice profile; otherwise follow the supplied text or conversation.
+Do not guess from a competitor's handle. For mixed content, ask for the main
+language when it matters. Preserve Turkish characters, names, currency and the
+brand's tone; do not translate English templates literally.
+Pass `--language tr` or `--language en` explicitly to humanize, detect, hookscore,
+beats, caption and swipe. The CLI default stays English for compatibility.
+For Turkish, use `slop.tr.json` and `hooks.tr.json`; unavailable checks are N/A.
+English contractions and explicit pronouns are not requirements for Turkish.
+Use approved Turkish brand examples for manual voice review; do not rewrite
+just to raise a score. Turkish scores are provisional editorial signals,
+not validated performance predictions or AI-authorship detection.
+
 ## Account context
 
 For account-specific work, resolve the user's publishing handle from the request
@@ -45,7 +60,8 @@ python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
    to. If it does not exist, ask for **three of their own reels**, transcribe or
    read them, infer the voice, and write the file. A script in the wrong voice
    is unusable, because they have to say it out loud.
-2. Read `hooks.json` in this folder. 26 formulas, each with a template, a filled
+2. Read `hooks.tr.json` for Turkish (a smaller starter catalogue) or
+   `hooks.json` for English. The English catalogue contains 26 formulas, each with a template, a filled
    example, the on-screen version, what it is for, and how it gets ruined.
    Four of them are in there because they kept turning up in real hooks, not
    because they completed a pattern.
@@ -79,7 +95,10 @@ nothing else does.
 three formulas that genuinely fit it, and write the spoken line plus the
 on-screen line for each. Different formulas, not three rewrites of one.
 
-**2. Score them.** Put the three spoken lines in a file, one per line, and run
+**2. Score them.** For Turkish, treat ranking as an editorial suggestion;
+unknown person/address stays N/A because Turkish can encode it in suffixes.
+Do not pad a short Turkish hook to satisfy English minimum word counts.
+ Put the three spoken lines in a file, one per line, and run
 `hookscore.py`. Show the user the ranking. If the top one is under 50, you do
 not have the hook yet and no amount of editing fixes that.
 

@@ -99,6 +99,46 @@ python3 skills/ig-viral/swipe.py captured.tsv --account studio_one
 `swipe.py --data-root /your/data --account studio_one`. Named accounts require
 the bundled `ig-account` folder; install all `ig-*` folders together.
 
+## Turkish content
+
+The six text tools support explicit `--language tr`; English remains the CLI
+default. All skill workflows pass the content language from the request or the
+selected account's voice profile. Add language, audience locale/timezone and
+preferred `sen`/`siz` address to that profile.
+
+```bash
+python3 skills/ig-human/humanize.py draft.txt --language tr --report
+python3 skills/ig-human/detect.py draft.txt --language tr --json
+python3 skills/ig-reel/hookscore.py --hook "Üç günde iki saat kazandım" --language tr
+python3 skills/ig-reel/beats.py script.txt --language tr --wpm 140
+python3 skills/ig-caption/caption.py caption.txt --language tr --keywords "iş geliştirme,yaratıcılık"
+python3 skills/ig-viral/swipe.py captured.tsv --language tr --account studio_one
+```
+
+Word counting keeps Turkish letters, apostrophes and written amounts together.
+Matching handles Turkish `I/ı` and `İ/i`, Unicode hashtags and common actions
+such as `kaydet`, `paylaş` and `Yorumlara REHBER yaz`. The Turkish cleaner uses
+a small, conservative `slop.tr.json`; vocabulary like `strateji` is not banned.
+Keep brand-specific overrides separate: the resolver returns `lexicon_tr` for
+`slop.tr.json` and `lexicon` for English `slop.json`. An override's language must
+match the command; old unmarked lexicons are treated as English.
+
+Turkish VOICE scoring is N/A: English contractions and explicit pronouns are
+not evidence for Turkish voice. Hook address is also N/A when person cannot
+be inferred from the supported explicit cues. Review against real brand samples
+instead. Turkish hook formulas are a limited starter catalogue; unknown hooks
+stay unclassified. The English hook benchmark AUC does not validate Turkish
+scores. All scores remain editorial heuristics, and speaking time is an estimate;
+use your measured speaking rate with `--wpm`.
+
+These are content-language improvements; command names and most diagnostic
+labels remain English. Mixed-language statistical scoring and full Turkish
+morphological analysis are not implemented. Research counts still require full
+integers or the documented English K/M/B notation; convert Turkish display
+abbreviations to full integers instead of guessing their magnitude.
+Install the whole pack, including `ig-account/ig_language.py`, which the six
+text tools now share. No third-party Python packages are required.
+
 ## The fourteen
 
 | command | what it does |

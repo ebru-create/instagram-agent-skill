@@ -10,6 +10,21 @@ description: >-
 
 # ig-audit
 
+## Content language
+
+Use the language explicitly requested for this content, then the selected
+account's voice profile; otherwise follow the supplied text or conversation.
+Do not guess from a competitor's handle. For mixed content, ask for the main
+language when it matters. Preserve Turkish characters, names, currency and the
+brand's tone; do not translate English templates literally.
+Pass `--language tr` or `--language en` explicitly to humanize, detect, hookscore,
+beats, caption and swipe. The CLI default stays English for compatibility.
+For Turkish, use `slop.tr.json` and `hooks.tr.json`; unavailable checks are N/A.
+English contractions and explicit pronouns are not requirements for Turkish.
+Use approved Turkish brand examples for manual voice review; do not rewrite
+just to raise a score. Turkish scores are provisional editorial signals,
+not validated performance predictions or AI-authorship detection.
+
 ## Account context
 
 For account-specific work, resolve the user's publishing handle from the request

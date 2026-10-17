@@ -1,0 +1,48 @@
+{
+  "language": "tr",
+  "note": "Sınırlı Türkçe kalıp eşleştirmeleri. Eşleşmeyen kancalar sınıflandırılmaz. İngilizce örneklemdeki AUC sonuçları Türkçeye aktarılmaz.",
+  "hooks": [
+    {
+      "id": 1,
+      "name": "Maliyeti anlat",
+      "template": "{gerçek hata} yüzünden {gerçek maliyet} kaybettim.",
+      "example": "Yanlış teklif yüzünden iki gün kaybettim.",
+      "match": "\\b(?:kaybettim|kaybettik|zarar ettim)\\b"
+    },
+    {
+      "id": 2,
+      "name": "Olumsuz komut",
+      "template": "{işe yaramayan davranışı} bırak.",
+      "example": "Her paylaşımda aynı başlığı kullanmayı bırak.",
+      "match": "\\b(?:bırak|bırakın|yapma|yapmayın)\\b"
+    },
+    {
+      "id": 3,
+      "name": "Kimse söylemiyor",
+      "template": "Kimse sana {doğru gözlem} söylemiyor.",
+      "example": "Kimse sana ilk videoların neden zor geldiğini söylemiyor.",
+      "match": "\\bkimse\\b[^.!?\\n]*\\b(?:söylemiyor|anlatmıyor)\\b"
+    },
+    {
+      "id": 5,
+      "name": "Süreyi kısalt",
+      "template": "{iş} eskiden {süre} sürüyordu, şimdi {süre} sürüyor.",
+      "example": "Teklif hazırlamak eskiden iki saat sürüyordu, şimdi yirmi dakika.",
+      "match": "\\beskiden\\b[^.!?\\n]*\\bşimdi\\b"
+    },
+    {
+      "id": 9,
+      "name": "Uygulanabilir örnek",
+      "template": "{iş} için kullandığım {somut araç}.",
+      "example": "Atölye planlamak için kullandığım üç soruluk liste.",
+      "match": "\\bkullandığım\\b"
+    },
+    {
+      "id": 16,
+      "name": "Gerçek soru",
+      "template": "{izleyicinin gerçekten sorduğu soru}?",
+      "example": "Atölye ücretini nasıl belirliyorsun?",
+      "match": "\\?$"
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "version": "1.0",
+  "note": "Türkçe için sınırlı editörlük ipuçlarıdır; yapay zekâ tespiti veya doğrulanmış kalite ölçümü değildir. Markanın kendi kelimelerini koruyun.",
+  "invisible": [
+    {
+      "cp": "U+200B",
+      "name": "ZERO WIDTH SPACE",
+      "action": "delete"
+    },
+    {
+      "cp": "U+2060",
+      "name": "WORD JOINER",
+      "action": "delete"
+    },
+    {
+      "cp": "U+FEFF",
+      "name": "ZERO WIDTH NO-BREAK SPACE / BOM",
+      "action": "delete"
+    },
+    {
+      "cp": "U+00AD",
+      "name": "SOFT HYPHEN",
+      "action": "delete"
+    },
+    {
+      "cp": "U+00A0",
+      "name": "NO-BREAK SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+202F",
+      "name": "NARROW NO-BREAK SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+2009",
+      "name": "THIN SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+2007",
+      "name": "FIGURE SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+2003",
+      "name": "EM SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+2002",
+      "name": "EN SPACE",
+      "action": "space"
+    },
+    {
+      "cp": "U+2063",
+      "name": "INVISIBLE SEPARATOR",
+      "action": "delete"
+    }
+  ],
+  "typographic": [
+    {
+      "from": "—",
+      "name": "EM DASH",
+      "to": ", "
+    },
+    {
+      "from": "–",
+      "name": "EN DASH",
+      "to": "-"
+    },
+    {
+      "from": "‘",
+      "name": "LEFT SINGLE QUOTE",
+      "to": "'"
+    },
+    {
+      "from": "’",
+      "name": "RIGHT SINGLE QUOTE",
+      "to": "'"
+    },
+    {
+      "from": "“",
+      "name": "LEFT DOUBLE QUOTE",
+      "to": "\""
+    },
+    {
+      "from": "”",
+      "name": "RIGHT DOUBLE QUOTE",
+      "to": "\""
+    },
+    {
+      "from": "…",
+      "name": "HORIZONTAL ELLIPSIS",
+      "to": "..."
+    },
+    {
+      "from": "′",
+      "name": "PRIME",
+      "to": "'"
+    },
+    {
+      "from": "·",
+      "name": "MIDDLE DOT",
+      "to": "-"
+    },
+    {
+      "from": "•",
+      "name": "BULLET",
+      "to": "-"
+    },
+    {
+      "from": "→",
+      "name": "RIGHTWARDS ARROW",
+      "to": "->"
+    }
+  ],
+  "words": [],
+  "phrases": [
+    {
+      "find": "günümüzün hızla değişen dünyasında",
+      "replace": "",
+      "family": "boilerplate"
+    },
+    {
+      "find": "günümüzün dijital dünyasında",
+      "replace": "",
+      "family": "boilerplate"
+    },
+    {
+      "find": "bu noktada belirtmek gerekir ki",
+      "replace": "",
+      "family": "boilerplate"
+    }
+  ],
+  "structures": [
+    {
+      "id": "tr-staged-contrast",
+      "name": "Kalıplaşmış karşılaştırma",
+      "regex": "(?i)\\bsadece\\b[^.!?\\n]{1,120}\\bdeğil\\b",
+      "fix": "Karşılaştırmanın bağlamda işe yarayıp yaramadığını kontrol et; otomatik silme."
+    },
+    {
+      "id": "tr-generic-promise",
+      "name": "Genel ve kanıtsız vaat",
+      "regex": "(?i)\\b(?:oyunun kurallarını değiştiren|eşsiz bir deneyim|sınırları zorlayan)\\b",
+      "fix": "Markanın sesine uygunluğunu ve varsa somut dayanağını kontrol et; yeni bir iddia uydurma."
+    }
+  ],
+  "language": "tr"
+}

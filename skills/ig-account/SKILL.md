@@ -9,6 +9,21 @@ description: >-
 
 # ig-account
 
+## Content language
+
+Use the language explicitly requested for this content, then the selected
+account's voice profile; otherwise follow the supplied text or conversation.
+Do not guess from a competitor's handle. For mixed content, ask for the main
+language when it matters. Preserve Turkish characters, names, currency and the
+brand's tone; do not translate English templates literally.
+Pass `--language tr` or `--language en` explicitly to humanize, detect, hookscore,
+beats, caption and swipe. The CLI default stays English for compatibility.
+For Turkish, use `slop.tr.json` and `hooks.tr.json`; unavailable checks are N/A.
+English contractions and explicit pronouns are not requirements for Turkish.
+Use approved Turkish brand examples for manual voice review; do not rewrite
+just to raise a score. Turkish scores are provisional editorial signals,
+not validated performance predictions or AI-authorship detection.
+
 Keep each publishing account's voice, plan, research, log and results under
 `~/.claude/instagram/accounts/HANDLE/`. Handles are case-insensitive; a leading
 `@` is accepted. Run this folder's helper by its installed absolute path:
@@ -24,7 +39,8 @@ and returns paths. Populate `voice.md` from the user's own examples or the
 repository's `templates/voice.md`. Do not invent a voice or copy another brand.
 Other context files are created only when the workflow produces their content.
 `results.md` stores account-specific audit findings for later planning.
-An optional `slop.json` lexicon override also stays in this directory; it never
+Optional `slop.json` (English) and `slop.tr.json` (Turkish) lexicon overrides
+also stay in this directory; it never
 changes another account's vocabulary rules.
 
 Select the publishing account from the explicit request or clearly established
@@ -60,4 +76,5 @@ python3 ../ig-viral/swipe.py captured.tsv --account studio_one
 `--account` and `--out` are mutually exclusive. `--data-root` allows an explicit
 alternative root with `--account`; the helper's matching option is `--root`.
 For a bundle installed without `ig-account`, reinstall the full pack to use
-named accounts. The text-only tools still work independently.
+named accounts. Text-only drafting can use supplied context; executable text
+tools require the bundled `ig_language.py` helper.

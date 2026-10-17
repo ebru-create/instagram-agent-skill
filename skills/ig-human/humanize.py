@@ -28,6 +28,10 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (upper, normalize, phrase_pattern, match_text, language_argument)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
@@ -107,31 +111,33 @@ def pass_typographic(text, lex):
     return text, hits
 
 
-def _match_case(src, repl):
+def _match_case(src, repl, language="en"):
     if not repl:
         return repl
     if src.isupper() and len(src) > 1:
-        return repl.upper()
+        return upper(repl, language)
     if src[0].isupper():
-        return repl[0].upper() + repl[1:]
+        return upper(repl[0], language) + repl[1:]
     return repl
 
 
-def pass_lexical(text, lex):
+def pass_lexical(text, lex, language="en"):
     """Replace slop words and phrases. Longest first so phrases win."""
     hits = []
     entries = sorted(lex["phrases"] + lex["words"],
                      key=lambda e: len(e["find"]), reverse=True)
     for entry in entries:
         find = entry["find"]
-        pattern = re.compile(r"\b" + re.escape(find).replace(r"\ ", r"\s+") + r"\b",
-                             re.IGNORECASE)
-        found = pattern.findall(text)
+        pattern = phrase_pattern(find, language)
+        found = list(pattern.finditer(match_text(text, language)))
         if not found:
             continue
         hits.append({"find": find, "replace": entry["replace"] or "(deleted)",
                      "count": len(found), "family": entry["family"]})
-        text = pattern.sub(lambda m: _match_case(m.group(0), entry["replace"]), text)
+        for match in reversed(found):
+            start, end = match.span()
+            replacement = _match_case(text[start:end], entry["replace"], language)
+            text = text[:start] + replacement + text[end:]
     # Clean up after deletions. Deleting a whole clause leaves orphaned
     # punctuation behind ("system. ." or a line that now opens on a comma),
     # and that reads worse than the slop did.
@@ -180,30 +186,31 @@ def scan_structures(text, lex):
     return flags
 
 
-def restore_capitals(original, text):
+def restore_capitals(original, text, language="en"):
     """Deleting an opener leaves the next word lower case.
 
     Only fix it for writers who capitalise their sentences in the first place:
     a deliberately lower-case voice is a style, not an artefact, and shouting
     over it would be exactly the kind of thing this script exists to stop.
     """
-    starts = re.findall(r"(?:^|[.!?]\s+|\n)\s*([A-Za-z])", original)
+    starts = re.findall(r"(?:^|[.!?]\s+|\n)\s*([^\W\d_])", original)
     if not starts or sum(1 for c in starts if c.isupper()) * 2 < len(starts):
         return text
-    return re.sub(r"(?:^|(?<=[.!?] )|(?<=[.!?]\n)|(?<=\n))\s*([a-z])",
-                  lambda m: m.group(0)[:-1] + m.group(1).upper(), text)
+    return re.sub(r"(?:^|(?<=[.!?] )|(?<=[.!?]\n)|(?<=\n))\s*([a-zçğıöşü])",
+                  lambda m: m.group(0)[:-1] + upper(m.group(1), language), text)
 
 
-def humanize(text, lex, preserve_typography=False):
+def humanize(text, lex, preserve_typography=False, language="en"):
     raw_for_case = text
     text, urls = protect_urls(text)
+    text = normalize(text)
     text, inv = pass_invisible(text, lex)
     if preserve_typography:
         typo = []
     else:
         text, typo = pass_typographic(text, lex)
-    text, lexi = pass_lexical(text, lex)
-    text = restore_capitals(raw_for_case, text)
+    text, lexi = pass_lexical(text, lex, language)
+    text = restore_capitals(raw_for_case, text, language)
     text = restore_urls(text, urls)
     return text.strip() + "\n", {
         "invisible": inv,
@@ -253,17 +260,20 @@ def main():
     ap.add_argument("-o", "--out", help="write cleaned text here instead of stdout")
     ap.add_argument("--report", action="store_true", help="print what changed, to stderr")
     ap.add_argument("--json", action="store_true", help="emit {text, report} as JSON")
-    ap.add_argument("--lexicon", default=LEX, help="path to slop.json")
+    ap.add_argument("--lexicon", help="full lexicon override for the selected language")
     ap.add_argument("--preserve-typography", action="store_true",
                     help="keep the user's punctuation and typographic characters")
+    language_argument(ap)
     args = ap.parse_args()
 
     raw = sys.stdin.read() if args.input == "-" else open(args.input, encoding="utf-8").read()
-    lex = load_lexicon(args.lexicon)
-    clean, report = humanize(raw, lex, args.preserve_typography)
+    lex = load_lexicon(args.lexicon or (str(Path(HERE) / "slop.tr.json") if args.language == "tr" else LEX))
+    if lex.get("language", "en") != args.language:
+        ap.error("lexicon language does not match --language; use a matching account override")
+    clean, report = humanize(raw, lex, args.preserve_typography, args.language)
 
     if args.json:
-        print(json.dumps({"text": clean, "report": report}, indent=2, ensure_ascii=False))
+        print(json.dumps({"text": clean, "report": report, "language": args.language}, indent=2, ensure_ascii=False))
         return
     if args.out:
         with open(args.out, "w", encoding="utf-8") as fh:

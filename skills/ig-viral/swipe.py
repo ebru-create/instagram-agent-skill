@@ -33,10 +33,13 @@ import os
 import re
 import statistics
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (words as unicode_words, lower, language_argument)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 HOOKS = os.path.join(HERE, "..", "ig-reel", "hooks.json")
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
 
 try:                                              # optional: score the hooks too
     sys.path.insert(0, os.path.join(HERE, "..", "ig-reel"))
@@ -45,7 +48,7 @@ except Exception:                                 # ig-viral copied on its own
     score_hook = None
 
 
-def load_formulas(path):
+def load_formulas(path, language="en"):
     try:
         with open(path, encoding="utf-8") as source:
             d = json.load(source)
@@ -54,10 +57,11 @@ def load_formulas(path):
     by_id = {h["id"]: h for h in d["hooks"]}
     order = d.get("classify_order") or sorted(by_id)
     return [(by_id[i]["id"], by_id[i]["name"],
-             re.compile(by_id[i]["match"], re.IGNORECASE)) for i in order if i in by_id]
+             re.compile(by_id[i]["match"], 0 if language == "tr" else re.IGNORECASE)) for i in order if i in by_id]
 
 
-def classify(hook, formulas):
+def classify(hook, formulas, language="en"):
+    hook = lower(hook, "tr") if language == "tr" else hook
     if not formulas:
         return None, "unclassified"
     for fid, name, pattern in formulas:
@@ -116,17 +120,17 @@ def read_rows(path):
     return rows
 
 
-def analyse(rows, formulas):
+def analyse(rows, formulas, language="en"):
     for r in rows:
         base = r.get("median") or r.get("followers") or 0
         r["baseline"] = base
         r["baseline_type"] = ("account median" if r.get("median") else
                               "follower count" if r.get("followers") else "unavailable")
         r["outlier"] = round(r["views"] / base, 2) if base else None
-        r["formula_id"], r["formula"] = classify(r["hook"], formulas)
-        r["words"] = len(WORD_RE.findall(r["hook"]))
+        r["formula_id"], r["formula"] = classify(r["hook"], formulas, language)
+        r["words"] = len(unicode_words(r["hook"]))
         if score_hook:
-            _, overall, verdict, _ = score_hook(r["hook"])
+            _, overall, verdict, _ = score_hook(r["hook"], language=language)
             r["hook_score"], r["hook_verdict"] = round(overall, 1), verdict
         else:
             r["hook_score"], r["hook_verdict"] = None, None
@@ -138,6 +142,8 @@ def analyse(rows, formulas):
         ranked = sorted(cohort, key=lambda r: -(r["outlier"] or 0))
         groups.append(summarise(ranked, baseline))
     return {
+        "language": language,
+        "validation_note": "Turkish hook scores are provisional editorial heuristics." if language == "tr" else "Hook scores do not predict views.",
         "baseline": groups[0]["baseline"] if len(groups) == 1 else "mixed (ranked separately)",
         "n": len(rows),
         "accounts": len({r.get("account", "") for r in rows}),
@@ -176,6 +182,8 @@ def summarise(ranked, baseline):
 
 def render(a, out=sys.stdout):
     if "groups" in a:
+        if a.get("language") == "tr":
+            print("Dil: tr. Türkçe kanca puanları deneysel editörlük ipuçlarıdır.", file=out)
         if a.get("owner_account"):
             print(f"Publishing account: @{a['owner_account']}", file=out)
         for group in a["groups"]:
@@ -217,6 +225,8 @@ def render(a, out=sys.stdout):
 def to_markdown(a):
     lines = ["# Swipe file", "", f"{a['n']} reels across {a['accounts']} accounts.",
              "Ranked separately within each baseline type; groups are not comparable.", ""]
+    if a.get("language") == "tr":
+        lines += ["Dil: tr. Türkçe kanca puanları deneysel editörlük ipuçlarıdır.", ""]
     if a.get("owner_account"):
         lines[2:2] = [f"Publishing account: @{a['owner_account']}", ""]
     for group in a["groups"]:
@@ -235,12 +245,13 @@ def to_markdown(a):
 def main():
     ap = argparse.ArgumentParser(description="Rank collected reels by outlier multiple.")
     ap.add_argument("input", nargs="?", default="-", help="TSV file, or - for stdin")
-    ap.add_argument("--hooks", default=HOOKS, help="path to ig-reel/hooks.json")
+    ap.add_argument("--hooks", help="custom formula catalogue (defaults to selected language)")
     destination = ap.add_mutually_exclusive_group()
     destination.add_argument("--out", help="also write the swipe file as markdown here")
     destination.add_argument("--account", help="save swipe.md for this publishing account")
     ap.add_argument("--data-root", help="alternative account data root (requires --account)")
     ap.add_argument("--json", action="store_true")
+    language_argument(ap)
     args = ap.parse_args()
 
     if args.data_root and not args.account:
@@ -269,8 +280,9 @@ def main():
         print("no usable rows. Need a tab-separated file with at least views and hook.",
               file=sys.stderr)
         sys.exit(2)
-    formulas = load_formulas(args.hooks)
-    a = analyse(rows, formulas)
+    hooks_path = args.hooks or (os.path.join(HERE, "..", "ig-reel", "hooks.tr.json") if args.language == "tr" else HOOKS)
+    formulas = load_formulas(hooks_path, args.language)
+    a = analyse(rows, formulas, args.language)
     if account_context:
         a["owner_account"] = account_context["account"]
     if not formulas:

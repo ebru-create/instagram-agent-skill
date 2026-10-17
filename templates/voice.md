@@ -18,6 +18,9 @@ the words out loud. A line you would never say is not a draft, it is a retake.
 
 - **Name:**
 - **Handle:**
+- **Content language:** (en / tr; specify per post for mixed accounts)
+- **Audience locale and timezone:** (for example tr-TR, Europe/Istanbul)
+- **Preferred address in Turkish:** (sen / siz; examples of natural phrasing)
 - **What I do, in one sentence:**
 - **Who I am talking to:** (be specific: "photographers charging under $2,000",
   not "creatives")
