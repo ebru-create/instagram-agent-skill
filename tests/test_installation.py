@@ -257,6 +257,15 @@ class InstalledBundleIntegrationTests(unittest.TestCase):
             report = json.loads(result.stdout)
             self.assertEqual(report["post_count"], 4)
             self.assertEqual(report["posts"][0]["relative_views"], .5)
+            result = cli(str(destination / "ig-plan/experiment.py"),
+                         str(destination / "ig-plan/example.experiment.tr.json"),
+                         "--account", "ornek_studyo", "--csv",
+                         str(destination / "ig-audit/example.synthetic.csv"),
+                         "--as-of", "2026-09-13T12:00:00+03:00", cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report["status"], "ready_descriptive")
+            self.assertEqual(report["review"]["variant_minus_control"], .02)
 
     def test_cli_flags_reject_ambiguous_replacement(self):
         with tempfile.TemporaryDirectory() as directory:

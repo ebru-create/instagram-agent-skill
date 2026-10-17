@@ -126,6 +126,16 @@ A couple of posts can guide a next experiment; they do not establish causality.
 If evidence remains weak, continue or revise the test rather than automatically
 scaling the highest-view post. Track actual execution separately from a draft.
 
+For a structured two-approach test with an agreed metric and practical difference,
+use [experiment records and CSV review](references/experiments.md). Validate a
+plan with `experiment.py`, keeping assignments empty until real published IDs
+are available. Add IDs and retain plan revisions as new snapshots; disclose any
+changes made after seeing results. Review against the same account's canonical
+CSV at the agreed post age and date. Incomplete results or a future review date
+must not produce a final comparison. A user-set minimum count or a met practical
+threshold does not establish significance or a causal winner. If the criterion
+is still unknown, keep a prose draft rather than inventing a target for the tool.
+
 ## Output
 
 Give the brief and evidence basis, then a calendar showing angle, format,

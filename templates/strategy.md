@@ -36,6 +36,7 @@ unrelated preferences. This brief does not authorize posting or messaging.
 - **Results/source dates relevant to this goal:**
 - **Observed findings with sample sizes and observation ages:**
 - **Current hypothesis:** (keep separate from observations)
+- **Experiment record and plan hash, if used:** (keep revisions; disclose post-result changes)
 - **What changes / what stays reasonably similar:**
 - **Metric, observation window and review date:**
 - **Known confounders or missing evidence:**

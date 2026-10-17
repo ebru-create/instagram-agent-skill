@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "account": "ornek_studyo",
+  "experiment_id": "kurgusal-kapak-denemesi",
+  "hypothesis": "Soru içeren kapak, aynı koşullarda paylaşım/erişim oranını artırabilir. Tamamen kurgusal hesaplama örneği.",
+  "change": "Kapakta düz cümle yerine soru kullanımı",
+  "held_similar": ["Organik karusel", "7 günlük gözlem", "Benzer konu ve hedef kitle amaçlanıyor; doğrulanmış değil"],
+  "confounders": ["Konu, yayın günü ve erişilen kitle farklı olabilir", "Her grupta tek kurgusal içerik var; sonuç kanıt sayılmaz"],
+  "primary_metric": "shares_per_reach",
+  "direction": "higher",
+  "minimum_effect": 0.01,
+  "format": "carousel",
+  "distribution": "organic",
+  "observation_hours": 168,
+  "review_at": "2026-09-12T12:00:00+03:00",
+  "min_posts_per_variant": 1,
+  "assignments": [
+    {"post_id": "fictional-1", "variant": "control"},
+    {"post_id": "fictional-2", "variant": "variant"}
+  ]
+}
