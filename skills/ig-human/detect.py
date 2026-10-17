@@ -27,7 +27,6 @@ import os
 import re
 import statistics
 import sys
-import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
@@ -63,7 +62,7 @@ def check_burstiness(text):
     """Humans vary sentence length hard. Models write even."""
     lens = [len(s.split()) for s in sentences(text)]
     if len(lens) < 4:
-        return 50.0, "too short to judge"
+        return None, "too short to judge"
     mean = statistics.mean(lens)
     cv = statistics.pstdev(lens) / mean if mean else 0
     score = scale(cv, human=0.70, machine=0.22)
@@ -74,7 +73,7 @@ def check_specificity(text):
     """Numbers, names and concrete nouns. Slop is abstract."""
     w = words(text)
     if len(w) < 25:
-        return 50.0, "too short to judge"
+        return None, "too short to judge"
     per100 = 100 / len(w)
     hits = len(NUMBERS.findall(text)) + len(set(PROPER.findall(text)))
     density = hits * per100
@@ -86,7 +85,7 @@ def check_slop(text, lex):
     """Stock vocabulary density against the lexicon."""
     w = words(text)
     if not w:
-        return 50.0, "empty"
+        return None, "no English words to assess"
     hits, found = 0, []
     for entry in lex["words"] + lex["phrases"]:
         pattern = re.compile(r"\b" + re.escape(entry["find"]).replace(r"\ ", r"\s+") + r"\b",
@@ -103,12 +102,12 @@ def check_slop(text, lex):
     return score, detail
 
 
-def check_fingerprint(text):
-    """Characters a phone keyboard does not produce."""
-    invisible = sum(1 for c in text if unicodedata.category(c) == "Cf")
-    em = text.count("—")
-    curly = sum(text.count(c) for c in "‘’“”")
-    ellip = text.count("…")
+def check_fingerprint(text, preserve_typography=False):
+    """Cleanup candidates, excluding meaningful joining/direction characters."""
+    invisible = sum(text.count(c) for c in "\u200b\u2060\ufeff\u00ad\u2063")
+    em = 0 if preserve_typography else text.count("—")
+    curly = 0 if preserve_typography else sum(text.count(c) for c in "‘’“”")
+    ellip = 0 if preserve_typography else text.count("…")
     nbsp = sum(text.count(c) for c in "   ")
     total = invisible * 4 + em * 2 + curly + ellip + nbsp
     per1k = total * 1000 / max(len(text), 1)
@@ -122,7 +121,7 @@ def check_voice(text, lex):
     """Contractions, person, and the shapes models default to."""
     w = words(text)
     if len(w) < 25:
-        return 50.0, "too short to judge"
+        return None, "too short to judge"
     per100 = 100 / len(w)
     contractions = len(CONTRACTIONS.findall(text)) * per100
     person = len(PRONOUNS.findall(text)) * per100
@@ -154,15 +153,19 @@ def check_voice(text, lex):
 CHECKS = ["BURSTINESS", "SPECIFICITY", "SLOP DENSITY", "FINGERPRINT", "VOICE"]
 
 
-def run(text, lex):
+def run(text, lex, preserve_typography=False):
     results = {}
     results["BURSTINESS"] = check_burstiness(text)
     results["SPECIFICITY"] = check_specificity(text)
     results["SLOP DENSITY"] = check_slop(text, lex)
-    results["FINGERPRINT"] = check_fingerprint(text)
+    results["FINGERPRINT"] = check_fingerprint(text, preserve_typography)
     results["VOICE"] = check_voice(text, lex)
-    scores = [results[c][0] for c in CHECKS]
-    # The weakest check drags the verdict: a detector only needs one signal.
+    if not words(text):
+        results = {c: (None, "no English words to assess") for c in CHECKS}
+    scores = [results[c][0] for c in CHECKS if results[c][0] is not None]
+    if not scores:
+        return results, None, "INSUFFICIENT TEXT"
+    # Unavailable checks do not penalise short text or trigger padding.
     overall = statistics.mean(scores) * 0.6 + min(scores) * 0.4
     verdict = "PASS" if overall >= 70 and min(scores) >= 55 else (
         "REVIEW" if overall >= 50 else "FLAGGED")
@@ -170,6 +173,8 @@ def run(text, lex):
 
 
 def bar(score, width=24):
+    if score is None:
+        return " " * width
     filled = round(score / 100 * width)
     return "#" * filled + "." * (width - filled)
 
@@ -180,12 +185,16 @@ def render(results, overall, verdict, label=None, out=sys.stdout):
     print("=" * max(len(title), 62), file=out)
     for name in CHECKS:
         score, detail = results[name]
-        print(f"  {name:<13} {bar(score)} {score:5.1f}", file=out)
+        value = f"{score:5.1f}" if score is not None else "  N/A"
+        print(f"  {name:<13} {bar(score)} {value}", file=out)
         print(f"  {'':<13} {detail}", file=out)
     print("-" * 62, file=out)
-    print(f"  {'HUMAN SCORE':<13} {bar(overall)} {overall:5.1f}   {verdict}", file=out)
-    if verdict != "PASS":
-        weakest = min(CHECKS, key=lambda c: results[c][0])
+    value = f"{overall:5.1f}" if overall is not None else "  N/A"
+    print(f"  {'HUMAN SCORE':<13} {bar(overall)} {value}   {verdict}", file=out)
+    applicable = [c for c in CHECKS if results[c][0] is not None]
+    print(f"  Coverage: {len(applicable)}/{len(CHECKS)} checks. N/A checks are excluded.", file=out)
+    if verdict not in ("PASS", "INSUFFICIENT TEXT"):
+        weakest = min(applicable, key=lambda c: results[c][0])
         print(f"\n  Weakest signal: {weakest}. Fix that first.", file=out)
     print("", file=out)
 
@@ -196,10 +205,18 @@ def main():
     ap.add_argument("compare", nargs="?", help="second file, to show before/after")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--lexicon", default=LEX)
+    ap.add_argument("--preserve-typography", action="store_true",
+                    help="do not penalise em dashes, curly quotes or ellipses")
     args = ap.parse_args()
 
-    lex = json.load(open(args.lexicon, encoding="utf-8"))
-    read = lambda p: sys.stdin.read() if p == "-" else open(p, encoding="utf-8").read()
+    with open(args.lexicon, encoding="utf-8") as source:
+        lex = json.load(source)
+
+    def read(path):
+        if path == "-":
+            return sys.stdin.read()
+        with open(path, encoding="utf-8") as source:
+            return source.read()
 
     targets = [(args.input, read(args.input))]
     if args.compare:
@@ -207,11 +224,13 @@ def main():
 
     payload = []
     for name, text in targets:
-        results, overall, verdict = run(text, lex)
+        results, overall, verdict = run(text, lex, args.preserve_typography)
         payload.append({
             "source": name,
-            "checks": {k: {"score": round(v[0], 1), "detail": v[1]} for k, v in results.items()},
-            "human_score": round(overall, 1),
+            "checks": {k: {"score": round(v[0], 1) if v[0] is not None else None,
+                            "detail": v[1]} for k, v in results.items()},
+            "human_score": round(overall, 1) if overall is not None else None,
+            "applicable_checks": sum(v[0] is not None for v in results.values()),
             "verdict": verdict,
         })
 
@@ -220,13 +239,16 @@ def main():
         return
 
     for (name, text), p in zip(targets, payload):
-        results, overall, verdict = run(text, lex)
+        results, overall, verdict = run(text, lex, args.preserve_typography)
         render(results, overall, verdict, label=os.path.basename(name) if args.compare else None)
     if args.compare:
         a, b = payload
-        delta = b["human_score"] - a["human_score"]
-        print(f"  {a['human_score']:.1f} {a['verdict']}  ->  "
-              f"{b['human_score']:.1f} {b['verdict']}   ({delta:+.1f})\n")
+        if a["human_score"] is not None and b["human_score"] is not None:
+            delta = b["human_score"] - a["human_score"]
+            print(f"  {a['human_score']:.1f} {a['verdict']}  ->  "
+                  f"{b['human_score']:.1f} {b['verdict']}   ({delta:+.1f})\n")
+        else:
+            print("  Score delta unavailable: one draft has insufficient text.\n")
 
     sys.exit(0 if payload[-1]["verdict"] == "PASS" else 1)
 
