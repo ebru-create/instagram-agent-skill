@@ -31,8 +31,12 @@ class ReleaseTests(unittest.TestCase):
         self.commit()
 
     def commit(self):
+        # Disposable repositories must have no background Git maintenance racing
+        # TemporaryDirectory cleanup on runners with newer Git versions.
         release.git(self.source, '-c', 'user.name=Release Fixture', '-c', 'user.email=fixture@example.invalid',
-                    '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null', 'commit', '-qm', 'fixture')
+                    '-c', 'commit.gpgsign=false', '-c', 'core.hooksPath=/dev/null',
+                    '-c', 'gc.auto=0', '-c', 'maintenance.auto=false', '-c', 'gc.autoDetach=false',
+                    'commit', '-qm', 'fixture')
 
     def test_same_source_produces_identical_archives_and_verified_hash_inventory(self):
         first = release.build(self.base / 'one', self.source)
