@@ -403,6 +403,35 @@ SWIPE FILE  ·  4 reels  ·  4 accounts  ·  baseline: account median
            "in this video I am going to show you my morning routine"
 ```
 
+## Carousel PNG export
+
+`ig-carousel/render.py` turns supplied slide copy into `01.png`, `02.png`, …
+at 1080x1350. It also writes a caption file, per-slide alt text/hashes in
+`manifest.json`, and a review overview under `review/`. It never publishes.
+
+This exporter alone needs optional Pillow plus a font file with Turkish/English
+coverage; other text tools and the installer do not require Pillow. Install the
+optional dependency into your chosen Python environment:
+
+```bash
+python3 -m pip install -r skills/ig-carousel/requirements.txt
+python3 skills/ig-carousel/render.py skills/ig-carousel/example.tr.json --font /path/to/font.ttf --check
+python3 skills/ig-carousel/render.py skills/ig-carousel/example.tr.json --font /path/to/font.ttf --out /path/to/new-export
+```
+
+Use `--font-bold /path/to/heading-font.ttf` for a separate heading font. Installed
+copies include the renderer, dependency file and fictional sample inside
+`ig-carousel/`. Fonts are user-supplied and are not bundled or downloaded.
+Read the [export schema and workflow](skills/ig-carousel/references/rendering.md)
+for account/language fields, colors, captions and alt text.
+
+The layout uses measured text wrapping and fixed legible font sizes. Overflow,
+missing font glyphs and low-contrast colors stop the export; copy is never
+silently cut or shrunk. Existing output folders are refused. The supplied
+layout supports Latin-script English/Turkish text; it is not a general
+multilingual typesetting engine or an AI image generator. Inspect every draft
+before posting and enter the supplied alt text in your publishing workflow.
+
 ## Reproducible evaluation
 
 Run a local evaluation with explicit labels and dataset provenance:
@@ -496,6 +525,7 @@ skills/ig-human/detect.py          the five-check panel
 skills/ig-viral/swipe.py           outlier ranking and formula classification
 skills/ig-profile/rubric.json      the 100-point profile score
 scripts/install.py               complete-bundle install, update, backup and checks
+skills/ig-carousel/render.py      optional PNG export with font/layout checks
 templates/voice.md                 your voice profile. Fill this in first.
 templates/strategy.md              confirmed goals, capacity and review criteria
 evaluation/evaluate.py            local hook metrics with provenance and source hashes

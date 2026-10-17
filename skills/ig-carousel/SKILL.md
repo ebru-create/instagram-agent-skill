@@ -44,13 +44,10 @@ unless they use saved brand context. If the helper is unavailable, work from
 supplied text without saved context or filesystem writes; install the full pack
 for persistent profiles. See [account setup](../ig-account/SKILL.md).
 
-Carousels are the highest-dwell format on the grid, because a swipe is an
-interaction and a scroll is not. They also get a second chance: Instagram can
-show a carousel again starting from a later slide to someone who did not engage
-the first time, so slide two has to stand on its own as well.
-
-The format rewards one idea broken into steps. It punishes a caption cut into
-pieces.
+Use a carousel when a sequence, reference or visual explanation benefits from
+separate slides. Each slide should contribute something; do not merely split
+one long caption into arbitrary pieces. Use this account's results to evaluate
+whether the format supports its current goal.
 
 ## When to use it instead of a Reel
 
@@ -63,8 +60,9 @@ If the idea is one claim, it is neither. Hand it to `/ig-reel` and say so.
 
 ## Structure
 
-6 to 10 slides. The cap is 20 and 20 is almost always a book nobody finishes.
-Under 5 and the swipe never starts.
+Choose the count from the agreed plan and material. The exporter supports
+2 to 20 slides, without a minimum cadence or a promise about completion. The
+structure below is an adaptable example, not a required number of slides.
 
 ```
 1         COVER     the hook. 6 words or fewer, at a size that is legible in
@@ -79,36 +77,42 @@ LAST      CTA       one action. Save, comment a keyword, or follow. One.
 
 ## Slide copy rules
 
-- **The cover is 80% of the result.** Six words. Big. Nothing on the deck saves
-  a cover nobody swipes.
+- **Give the cover one clear promise.** Keep the title readable and specific;
+  use a short headline when the meaning allows it.
 - **Design for the grid crop.** The profile grid crops to a portrait rectangle
   that is taller than it is wide, and the exact ratio has moved more than once.
   Build at 1080x1350 and keep the cover text well inside the middle, clear of
   the outer 120 pixels on every side, and the crop stops mattering.
-- **Number the slides** (3/8). Completion goes up when people can see the end.
+- **Number the slides** (3/8) so the reader can see the sequence.
 - **No slide is a paragraph.** If it cannot be said in 25 words, split it.
-- **The recap slide is the one people screenshot and send.** Sends are the
-  strongest signal you can earn. Make it standalone and readable with no
-  context.
+- **Make a recap standalone when useful.** It can be a reference the reader
+  saves or shares; evaluate those outcomes rather than promising them.
 - **The handle on every slide**, small, bottom corner. Screenshots travel
   without you.
-- **Alt text on the cover at minimum.** It is read by screen readers and by
-  Instagram.
+- **Write descriptive alt text for every slide.** The exporter requires it
+  and stores it alongside the images for the user to enter when posting.
 
 ## Building the files
 
-Instagram wants 1080x1350 (4:5), JPEG or PNG, up to 20 items. Build it as HTML
-and print each slide:
+Use this folder's `render.py` to produce numbered RGB PNGs at 1080x1350, a review
+overview, caption text and a manifest with per-slide alt text and hashes. Read
+[references/rendering.md](references/rendering.md) for the JSON schema and font
+options when generating files. `example.tr.json` is a fictional Turkish sample,
+not the user's brand or approved factual copy.
 
-```bash
-# one <section> per slide, 1080x1350, page-break-after: always
-# then Chrome headless --print-to-pdf, or any HTML-to-image you already use
-```
+PNG export needs optional Pillow and an explicit TrueType/OpenType font that
+contains the text's glyphs. The other tools keep their standard-library-only
+runtime. Do not install packages silently; use an available environment or
+explain the exact optional requirement if missing. Use the brand's supplied
+fonts/colors when available. Never download or distribute a font without the
+appropriate permission.
 
-Write the HTML with `width:1080px; height:1350px`, a single accent colour, and
-type no smaller than 32px, because this is read on a phone at a third of its
-real size. If the project has a brand skill or a design system, use it and do
-not invent a palette.
+Run `--check` first. If copy does not fit, shorten/split it without losing
+meaning; the renderer does not shrink fonts, truncate text or silently replace
+missing glyphs. Preserve account and language in the JSON. Use a fresh export
+folder for each draft so old slide counts cannot mix with the new output.
+Review the overview and full-size images, confirm copy/diacritics/line breaks,
+and provide the image directory plus alt text and caption. Nothing is uploaded.
 
 ## Output
 
@@ -117,8 +121,9 @@ seconds and edit before anything is rendered. Then the **caption**, which for a
 carousel is Job B in `/ig-caption`: the caption is doing work here, because the
 cover has already used its six words.
 
-Run both through `/ig-human`. Build the files only after the user approves the
-copy.
+Run both through `/ig-human` with the selected language. If the user requests
+copy-only or an explicit copy-approval stage, stop at that stage. Otherwise
+render the requested draft for review; local generation is not publishing.
 
 ```
 CAROUSEL  ·  8 slides

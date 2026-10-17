@@ -56,7 +56,8 @@ def bundle(source=ROOT):
     required = ("ig-account/ig_language.py", "ig-account/account.py", "ig-reel/hooks.json",
                 "ig-reel/hooks.tr.json", "ig-human/slop.json", "ig-human/slop.tr.json",
                 "ig-human/humanize.py", "ig-human/detect.py", "ig-reel/hookscore.py",
-                "ig-reel/beats.py", "ig-caption/caption.py", "ig-viral/swipe.py")
+                "ig-reel/beats.py", "ig-caption/caption.py", "ig-viral/swipe.py",
+                "ig-carousel/render.py", "ig-carousel/requirements.txt", "ig-carousel/example.tr.json")
     if any(name not in files for name in required):
         raise ValueError("incomplete source bundle; use a full repository checkout")
     for path in files.values():

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "language": "tr",
+  "account": "ornek_studyo",
+  "theme": {"background": "#F4F0E8", "text": "#16231D", "accent": "#2C6E49"},
+  "caption": "Bir sonraki atölyen için bu üç soruyu kaydet. Bu içerik dışa aktarma aracının kurmaca örneğidir.",
+  "slides": [
+    {"label": "ATÖLYE NOTLARI", "title": "İyi bir atölye üç soruyla başlar", "body": "Önce amaç, sonra akış.\nKatılımcının deneyimini birlikte düşünelim.", "alt_text": "Krem zemin üzerinde koyu yeşil yazıyla: İyi bir atölye üç soruyla başlar. Altında önce amaç, sonra akış önerisi yer alıyor."},
+    {"label": "01 — AMAÇ", "title": "Katılımcı neyi deneyecek?", "body": "Sadece anlatılacak konuyu değil, yapılacak somut uygulamayı tanımla.", "alt_text": "Birinci soru: Katılımcı neyi deneyecek? Somut uygulamayı tanımlamayı öneren metin."},
+    {"label": "02 — AKIŞ", "title": "Denemek için yeterli zaman var mı?", "body": "Anlatım, uygulama ve paylaşım için ayrı zaman ayır.\nKendi grubunun hızını dikkate al.", "alt_text": "İkinci soru: Denemek için yeterli zaman var mı? Anlatım, uygulama ve paylaşım için zaman ayırma önerisi."},
+    {"label": "03 — DEVAM", "title": "Atölyeden sonra ne kalacak?", "body": "Katılımcının yanında götürebileceği küçük bir uygulama seç.\nBu üç soruyu bir sonraki planın için kaydet.", "alt_text": "Üçüncü soru: Atölyeden sonra ne kalacak? Küçük bir uygulama seçme ve üç soruyu kaydetme çağrısı."}
+  ]
+}
