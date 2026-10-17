@@ -11,6 +11,21 @@ description: >-
 
 # ig-human
 
+## Content language
+
+Use the language explicitly requested for this content, then the selected
+account's voice profile; otherwise follow the supplied text or conversation.
+Do not guess from a competitor's handle. For mixed content, ask for the main
+language when it matters. Preserve Turkish characters, names, currency and the
+brand's tone; do not translate English templates literally.
+Pass `--language tr` or `--language en` explicitly to humanize, detect, hookscore,
+beats, caption and swipe. The CLI default stays English for compatibility.
+For Turkish, use `slop.tr.json` and `hooks.tr.json`; unavailable checks are N/A.
+English contractions and explicit pronouns are not requirements for Turkish.
+Use approved Turkish brand examples for manual voice review; do not rewrite
+just to raise a score. Turkish scores are provisional editorial signals,
+not validated performance predictions or AI-authorship detection.
+
 ## Account context
 
 For account-specific work, resolve the user's publishing handle from the request
@@ -40,9 +55,12 @@ Both read `slop.json`: 154 stock words and phrases with plain-English
 replacements, 11 cleanup character classes, 11 typographic substitutions and
 16 structural tells. The last block of each list is Instagram-specific, the
 vocabulary that only shows up in captions and voiceovers. It is meant to be
-edited. If the resolved `lexicon` file exists, pass it via `--lexicon` to both
-scripts. If a brand uses a word the lexicon strips, copy the bundled lexicon to
-that account's `lexicon` path, edit the copy and use it. Do not edit
+edited. Use the resolved `lexicon_tr` path for Turkish or `lexicon` for English.
+If that language's override exists, pass it via `--lexicon` to both scripts.
+Otherwise use the bundled lexicon for that language. If a brand needs an
+exception, copy the matching bundled lexicon to its resolved override path and
+edit the copy. Keep `language: tr` in Turkish overrides; unmarked old lexicons
+are English and are rejected with `--language tr`. Do not edit
 the shared lexicon for a brand preference; generic text edits can use defaults.
 
 ## Why this matters more on Instagram than it looks
@@ -107,8 +125,9 @@ Checks without enough text report `N/A` (JSON `null`) and are excluded.
 The verdict weights the mean of applicable checks at 60% and the weakest
 applicable check at 40%. PASS needs an overall of 70+ with no applicable check
 below 55. Always show coverage: a short DM may pass only two of five checks.
-Empty text or text without English words gets `INSUFFICIENT TEXT`, not a pass.
-These English heuristics do not establish human authorship.
+Empty text or text without words gets `INSUFFICIENT TEXT`, not a pass.
+For Turkish, VOICE stays N/A and requires manual review. These heuristics do
+not establish human authorship.
 
 ## Say this honestly
 

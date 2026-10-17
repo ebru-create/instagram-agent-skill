@@ -35,8 +35,11 @@ import json
 import re
 import statistics
 import sys
+from pathlib import Path
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (words as unicode_words, lower, normalize, PROPER_RE as UNICODE_PROPER, CONCRETE_RE as UNICODE_CONCRETE, TR_NUMBERS, TR_MONEY, language_argument)
+
 NUMBER_RE = re.compile(
     r"\$\s?\d[\d,]*(?:\.\d+)?"                       # money, whole
     r"|\b\d[\d,]*(?:\.\d+)?\s?"                      # a figure, with or
@@ -115,10 +118,10 @@ def clamp(n):
 
 def words(text):
     # "$18,000" is one word when it is spoken, so it is one word here too.
-    return WORD_RE.findall(re.sub(r"(?<=\d),(?=\d)", "", text))
+    return unicode_words(text)
 
 
-def check_length(text):
+def check_length(text, language="en"):
     """A hook has to land before the thumb moves. Roughly two seconds."""
     w = words(text)
     n = len(w)
@@ -126,13 +129,18 @@ def check_length(text):
     chars = len(text.strip())
     if 5 <= n <= 12:
         score = 100.0
+    elif language == "tr" and 0 < n < 5:
+        # Turkish can express a full proposition in fewer words. Do not
+        # require padding to meet an English lower word-count threshold.
+        score = 100.0
     elif n < 5:
         score = clamp(100 - (5 - n) * 20)
     else:
         score = clamp(100 - (n - 12) * 11)
     if chars > 60:                       # two lines of big on-screen text
         score -= 12
-    return clamp(score), f"{n} words, {chars} chars, ~{secs:.1f}s spoken (want 5-12 words)"
+    target = "length advisory; time a real read" if language == "tr" else "want 5-12 words"
+    return clamp(score), f"{n} words, {chars} chars, ~{secs:.1f}s spoken ({target})"
 
 
 def check_specificity(text):
@@ -213,16 +221,63 @@ def check_address(text):
 CHECKS = ["LENGTH", "SPECIFICITY", "STAKES", "FRONTLOAD", "ADDRESS"]
 
 
-def run(text):
-    results = {
-        "LENGTH": check_length(text),
-        "SPECIFICITY": check_specificity(text),
-        "STAKES": check_stakes(text),
-        "FRONTLOAD": check_frontload(text),
-        "ADDRESS": check_address(text),
+TR_STAKES = {"kaybettim", "kaybettik", "kaybetme", "hata", "hatalı", "yanlış", "zarar",
+             "ücretsiz", "risk", "tehlike", "asla", "kimse", "değil", "yok", "ama",
+             "ancak", "yerine", "sadece", "pişman", "tasarruf", "bütçe"}
+TR_VIEWER = {"sen", "sana", "seni", "senin", "siz", "size", "sizi", "sizin", "kendin"}
+TR_PERSON = {"ben", "benim", "bana", "biz", "bizim", "bize"}
+TR_IMPERATIVES = {"kaydet", "dene", "kullan", "izle", "bak", "bırak", "başla", "yaz", "sil"}
+
+
+def turkish_checks(text):
+    raw_tokens = words(text)
+    tokens = [lower(w, "tr") for w in raw_tokens]
+    proper_tokens = set(UNICODE_PROPER.findall(normalize(text)))
+    numbers = TR_NUMBERS | TR_MONEY
+    concrete = len(UNICODE_CONCRETE.findall(normalize(text))) + sum(t in numbers for t in tokens)
+    markers = sorted(set(tokens) & TR_STAKES)
+    payload = next((i for i, t in enumerate(tokens)
+                    if t in numbers | TR_STAKES or any(c.isdigit() for c in t)
+                    or (i and re.split("['’]", raw_tokens[i])[0] in proper_tokens)), None)
+    frontload = 30.0 if payload is None else 100.0 if payload <= 3 else 70.0 if payload <= 6 else 40.0
+    if tokens and tokens[0] in {"merhaba", "selam", "bugün"}:
+        frontload = max(0, frontload - 30)
+    if set(tokens) & TR_VIEWER:
+        address = (100.0, "explicit Turkish viewer address")
+    elif tokens and tokens[0] in TR_IMPERATIVES:
+        address = (90.0, "Turkish imperative opener")
+    elif set(tokens) & TR_PERSON:
+        address = (70.0, "explicit Turkish first person")
+    else:
+        address = (None, "Turkish subject/person may be in suffixes; review manually")
+    return {
+        "LENGTH": check_length(text, "tr"),
+        "SPECIFICITY": (15.0 if not concrete else clamp(45 + concrete * 30), f"{concrete} concrete marker(s)"),
+        "STAKES": ({0: 20.0, 1: 70.0}.get(len(markers), 100.0), f"Turkish tension markers: {', '.join(markers) or 'none'}"),
+        "FRONTLOAD": (frontload, "no explicit payload marker" if payload is None else f"payload at word {payload + 1}"),
+        "ADDRESS": address,
     }
-    flags = [msg for pattern, msg in DEALBREAKERS if pattern.search(text)]
-    scores = [results[c][0] for c in CHECKS]
+
+
+def run(text, language="en"):
+    if language == "tr":
+        results = turkish_checks(text)
+        flags = [msg for pattern, msg in DEALBREAKERS[-2:] if pattern.search(text)]
+        low = lower(text, "tr")
+        if re.search(r"^\s*(?:merhaba|selam)\b", low):
+            flags.append("Selamlama yerine konuya doğrudan girmeyi değerlendirin.")
+        if re.search(r"\b(?:bu videoda|bugün sizlere|kaydırmayı bırak)\b", low):
+            flags.append("Video giriş kalıbı: asıl fikri öne almayı değerlendirin.")
+    else:
+        results = {
+            "LENGTH": check_length(text),
+            "SPECIFICITY": check_specificity(text),
+            "STAKES": check_stakes(text),
+            "FRONTLOAD": check_frontload(text),
+            "ADDRESS": check_address(text),
+        }
+        flags = [msg for pattern, msg in DEALBREAKERS if pattern.search(text)]
+    scores = [results[c][0] for c in CHECKS if results[c][0] is not None]
     # The weakest property caps the hook, same logic as detect.py: one bad
     # property is enough for the thumb to keep moving.
     overall = statistics.mean(scores) * 0.6 + min(scores) * 0.4 - len(flags) * 15
@@ -233,6 +288,8 @@ def run(text):
 
 
 def bar(score, width=24):
+    if score is None:
+        return " " * width
     filled = round(score / 100 * width)
     return "#" * filled + "." * (width - filled)
 
@@ -243,14 +300,16 @@ def render_one(text, results, overall, verdict, flags, out=sys.stdout):
     print(f"  \"{text.strip()}\"\n", file=out)
     for name in CHECKS:
         score, detail = results[name]
-        print(f"  {name:<13} {bar(score)} {score:5.1f}", file=out)
+        value = f"{score:5.1f}" if score is not None else "  N/A"
+        print(f"  {name:<13} {bar(score)} {value}", file=out)
         print(f"  {'':<13} {detail}", file=out)
     print("-" * 62, file=out)
     print(f"  {'HOOK SCORE':<13} {bar(overall)} {overall:5.1f}   {verdict}", file=out)
+    print(f"  Coverage: {sum(results[c][0] is not None for c in CHECKS)}/{len(CHECKS)} checks.", file=out)
     for f in flags:
         print(f"\n  DEALBREAKER  {f}", file=out)
     if verdict != "STRONG":
-        weakest = min(CHECKS, key=lambda c: results[c][0])
+        weakest = min((c for c in CHECKS if results[c][0] is not None), key=lambda c: results[c][0])
         print(f"\n  Weakest property: {weakest}. Fix that one and re-run.", file=out)
     print("", file=out)
 
@@ -273,6 +332,7 @@ def main():
     ap.add_argument("input", nargs="?", default="-", help="file with one hook per line, or -")
     ap.add_argument("--hook", help="score a single hook given on the command line")
     ap.add_argument("--json", action="store_true")
+    language_argument(ap)
     args = ap.parse_args()
 
     if args.hook:
@@ -286,11 +346,14 @@ def main():
 
     payload = []
     for line in lines:
-        results, overall, verdict, flags = run(line)
+        results, overall, verdict, flags = run(line, args.language)
         payload.append({
             "hook": line,
-            "checks": {k: {"score": round(v[0], 1), "detail": v[1]} for k, v in results.items()},
-            "weakest": min(CHECKS, key=lambda c: results[c][0]),
+            "language": args.language,
+            "validation_note": "Turkish editorial heuristics; English AUC does not apply." if args.language == "tr" else "Not a view predictor.",
+            "checks": {k: {"score": round(v[0], 1) if v[0] is not None else None, "detail": v[1]} for k, v in results.items()},
+            "weakest": min((c for c in CHECKS if results[c][0] is not None), key=lambda c: results[c][0]),
+            "applicable_checks": sum(v[0] is not None for v in results.values()),
             "flags": flags,
             "score": round(overall, 1),
             "verdict": verdict,
@@ -301,10 +364,13 @@ def main():
         return
 
     if len(payload) == 1:
-        results, overall, verdict, flags = run(lines[0])
+        results, overall, verdict, flags = run(lines[0], args.language)
         render_one(lines[0], results, overall, verdict, flags)
     else:
         render_table(sorted(payload, key=lambda r: -r["score"]))
+
+    if args.language == "tr":
+        print("Dil: tr. Deneysel editörlük puanı; İngilizce AUC sonuçları Türkçe için geçerli değildir.")
 
     sys.exit(0 if max(p["score"] for p in payload) >= 70 else 1)
 

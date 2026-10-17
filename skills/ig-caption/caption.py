@@ -25,6 +25,10 @@ import argparse
 import json
 import re
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (lower, normalize, CONCRETE_RE as UNICODE_CONCRETE, language_argument)
 import textwrap
 
 LIMIT = 2200             # Instagram's hard caption limit.
@@ -35,12 +39,11 @@ HASHTAG_LIMIT = 5        # Instagram's cap per post or reel since 18 Dec 2025,
                          # rather than many generic ones, can improve both your
                          # content's performance and people's experience".
 
-HASHTAG_RE = re.compile(r"(?:^|\s)(#[A-Za-z0-9_]+)")
+HASHTAG_RE = re.compile(r"(?:^|\s)(#\w+)")
 MENTION_RE = re.compile(r"(?:^|\s)(@[A-Za-z0-9_.]+)")
 LINK_RE = re.compile(r"https?://\S+|\bwww\.\S+|\b[a-z0-9-]+\.(?:com|co|io|net|org|ai|app)/\S*",
                      re.IGNORECASE)
 EMOJI_RE = re.compile(r"[\U0001F300-\U0001FAFF☀-➿←-⇿️]")
-CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 
 ASKS = [
     (re.compile(r"(?i)\bcomment (?:the word |\")?[A-Z0-9]{2,}\b"), "comment a keyword"),
@@ -51,6 +54,17 @@ ASKS = [
     (re.compile(r"(?i)\blink in (?:my )?bio\b"), "link in bio"),
     (re.compile(r"(?i)\b(?:swipe|tap) (?:through|left|right|for|to)\b"), "swipe or tap"),
     (re.compile(r"(?i)\btell me\b|\bwhat would you\b|\bwhich one\b"), "answer a question"),
+]
+
+TR_ASKS = [
+    (re.compile(r"\byorum(?:a|lara)?\b[^.!?\n]{0,50}\b(?:yaz|yazın|bırak|bırakın|yap|yapın)\b"), "yorum yaz"),
+    (re.compile(r"\b(?:dm|mesaj)\b[^.!?\n]{0,25}\b(?:yaz|yazın|at|atın|gönder|gönderin)\b"), "mesaj gönder"),
+    (re.compile(r"\b(?:kaydet|kaydedin)\b"), "kaydet"),
+    (re.compile(r"\b(?:paylaş|paylaşın)\b"), "paylaş"),
+    (re.compile(r"\btakip\s+(?:et|edin)\b"), "takip et"),
+    (re.compile(r"\b(?:biyografideki|profildeki)\s+(?:link|bağlantı)\w*"), "profil bağlantısı"),
+    (re.compile(r"\b(?:kaydır|kaydırın|dokun|dokunun)\b"), "kaydır veya dokun"),
+    (re.compile(r"\b(?:sence|sizce|hangisini|ne düşünüyorsun|ne düşünüyorsunuz)\b"), "soruyu yanıtla"),
 ]
 
 FILLER_TAGS = {"#viral", "#fyp", "#explore", "#explorepage", "#foryou", "#foryoupage",
@@ -76,7 +90,8 @@ def render_box(window, truncated, out=sys.stdout, width=52):
     print("  +" + "-" * (width + 2 - len(tail) - 2) + f" {tail} " + "+", file=out)
 
 
-def analyse(text, cut=TRUNCATE, keywords=None):
+def analyse(text, cut=TRUNCATE, keywords=None, language="en"):
+    text = normalize(text)
     text = text.rstrip()
     stripped = text.strip()
     chars = len(stripped)
@@ -88,7 +103,8 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     emoji = EMOJI_RE.findall(stripped)
     window = visible_window(stripped, cut)
     truncated = chars > cut
-    asks = [name for pattern, name in ASKS if pattern.search(stripped)]
+    ask_patterns = ASKS if language == "en" else TR_ASKS
+    asks = [name for pattern, name in ask_patterns if pattern.search(lower(stripped, language))]
     filler = [t for t in tags if t.lower() in FILLER_TAGS]
     keywords = [k.strip() for k in (keywords or []) if k.strip()]
 
@@ -113,9 +129,9 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     else:
         add("FIRST LINE", "PASS", f"{len(first_line)} characters, lands whole")
 
-    add("HOOK IS CONCRETE", "PASS" if CONCRETE_RE.search(window) else "WARN",
-        f"{len(CONCRETE_RE.findall(window))} number(s) or name(s) in the visible window"
-        + ("" if CONCRETE_RE.search(window) else " - nothing checkable before the tap"))
+    add("HOOK IS CONCRETE", "PASS" if UNICODE_CONCRETE.search(window) else "WARN",
+        f"{len(UNICODE_CONCRETE.findall(window))} number(s) or name(s) in the visible window"
+        + ("" if UNICODE_CONCRETE.search(window) else " - nothing checkable before the tap"))
 
     if len(tags) > HASHTAG_LIMIT:
         add("HASHTAGS", "FAIL", f"{len(tags)} tags, over Instagram's cap of {HASHTAG_LIMIT}. "
@@ -155,10 +171,10 @@ def analyse(text, cut=TRUNCATE, keywords=None):
         + (" - reads as decoration" if density > 4 else ""))
 
     if keywords:
-        low = stripped.lower()
-        found = [k for k in keywords if k.lower() in low]
-        missing = [k for k in keywords if k.lower() not in low]
-        in_window = [k for k in found if k.lower() in window.lower()]
+        low = lower(stripped, language)
+        found = [k for k in keywords if lower(k, language) in low]
+        missing = [k for k in keywords if lower(k, language) not in low]
+        in_window = [k for k in found if lower(k, language) in lower(window, language)]
         status = "PASS" if not missing else ("WARN" if found else "FAIL")
         add("SEARCH TERMS", status,
             f"{len(found)}/{len(keywords)} present"
@@ -170,7 +186,7 @@ def analyse(text, cut=TRUNCATE, keywords=None):
     verdict = "FIX" if fails else ("REVIEW" if warns else "READY")
 
     return {
-        "characters": chars, "limit": LIMIT, "truncate_at": cut,
+        "language": language, "characters": chars, "limit": LIMIT, "truncate_at": cut,
         "visible": window, "truncated": truncated,
         "first_line_chars": len(first_line),
         "hashtags": tags, "mentions": mentions, "links": links,
@@ -199,10 +215,11 @@ def main():
                     help=f"characters shown before '... more' (default {TRUNCATE})")
     ap.add_argument("--keywords", default="", help="comma-separated terms you want to be found for")
     ap.add_argument("--json", action="store_true")
+    language_argument(ap)
     args = ap.parse_args()
 
     raw = sys.stdin.read() if args.input == "-" else open(args.input, encoding="utf-8").read()
-    a = analyse(raw, cut=args.truncate, keywords=args.keywords.split(","))
+    a = analyse(raw, cut=args.truncate, keywords=args.keywords.split(","), language=args.language)
     if args.json:
         print(json.dumps(a, indent=2, ensure_ascii=False))
     else:

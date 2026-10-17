@@ -25,10 +25,12 @@ import argparse
 import json
 import re
 import sys
+from pathlib import Path
 
-WORD_RE = re.compile(r"[A-Za-z0-9$%'’-]+")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (words as unicode_words, lower, normalize, CONCRETE_RE as UNICODE_CONCRETE, TR_NUMBERS, TR_MONEY, language_argument)
+
 SENT_RE = re.compile(r"[^.!?]+[.!?]*")
-CONCRETE_RE = re.compile(r"\$\s?\d|\b\d[\d,.]*\b|(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 STOPWORDS = {
     "the", "a", "an", "and", "or", "but", "if", "of", "to", "in", "on", "for",
     "with", "that", "this", "it", "is", "are", "was", "were", "be", "been",
@@ -44,7 +46,7 @@ ABSTRACT_RUN = 3         # beats in a row with nothing checkable in them.
 
 def words(text):
     # "$18,000" is one word when it is spoken, so it is one word here too.
-    return WORD_RE.findall(re.sub(r"(?<=\d),(?=\d)", "", text))
+    return unicode_words(text)
 
 
 def pretty(token):
@@ -82,7 +84,8 @@ def split_beats(raw, wps):
     return beats
 
 
-def analyse(raw, wpm=165, target=None):
+def analyse(raw, wpm=165, target=None, language="en"):
+    raw = normalize(raw)
     wps = wpm / 60.0
     beats = split_beats(raw, wps)
     if not beats:
@@ -98,7 +101,7 @@ def analyse(raw, wpm=165, target=None):
             "dur": round(dur, 2),
             "words": n,
             "text": text,
-            "concrete": len(CONCRETE_RE.findall(text)),
+            "concrete": len(UNICODE_CONCRETE.findall(text)) + (sum(lower(w, "tr") in TR_NUMBERS | TR_MONEY for w in words(text)) if language == "tr" else 0),
             "label": "",
             "flags": [],
         })
@@ -146,8 +149,10 @@ def analyse(raw, wpm=165, target=None):
             run, start = 0, None
 
     # Does the last line hand you back to the first one?
-    first = {w.lower() for w in words(rows[0]["text"]) if w.lower() not in STOPWORDS}
-    last = {w.lower() for w in words(rows[-1]["text"]) if w.lower() not in STOPWORDS}
+    stopwords = {"ve", "veya", "ama", "bu", "şu", "bir", "için", "ile", "de", "da",
+                 "ben", "sen", "biz", "siz", "o", "mi", "mı", "mu", "mü"} if language == "tr" else STOPWORDS
+    first = {lower(w, language) for w in words(rows[0]["text"]) if lower(w, language) not in stopwords}
+    last = {lower(w, language) for w in words(rows[-1]["text"]) if lower(w, language) not in stopwords}
     loop = sorted(pretty(w) for w in first & last)
     if loop:
         notes.append(f"Loops: the last beat repeats \"{', '.join(loop[:3])}\" from the hook. "
@@ -166,7 +171,10 @@ def analyse(raw, wpm=165, target=None):
             notes.append(f"{-delta:.1f}s under target. Either add {int(-delta * wps)} words "
                          "or shoot it short. Short is usually right.")
 
+    if language == "tr":
+        notes.append("Türkçe süre tahminidir: kendi sesli okuma hızınızı --wpm ile girin. Ek almış sözcükler için döngü eşleştirmesi sınırlıdır.")
     return {
+        "language": language,
         "wpm": wpm, "target": target,
         "total_seconds": round(total, 2),
         "total_words": sum(r["words"] for r in rows),
@@ -197,10 +205,11 @@ def main():
     ap.add_argument("--wpm", type=float, default=165, help="speaking rate (default 165)")
     ap.add_argument("--target", type=float, help="target length in seconds")
     ap.add_argument("--json", action="store_true")
+    language_argument(ap)
     args = ap.parse_args()
 
     raw = sys.stdin.read() if args.input == "-" else open(args.input, encoding="utf-8").read()
-    a = analyse(raw, wpm=args.wpm, target=args.target)
+    a = analyse(raw, wpm=args.wpm, target=args.target, language=args.language)
     if not a:
         print("empty script", file=sys.stderr)
         sys.exit(2)

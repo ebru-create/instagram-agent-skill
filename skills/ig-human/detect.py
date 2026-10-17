@@ -27,16 +27,18 @@ import os
 import re
 import statistics
 import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "ig-account"))
+from ig_language import (words as unicode_words, lower, PROPER_RE as UNICODE_PROPER, TR_NUMBERS, TR_MONEY, phrase_pattern, match_text, language_argument)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
 
 SENT_RE = re.compile(r"[^.!?\n]+[.!?]*")
-WORD_RE = re.compile(r"[A-Za-z']+")
 CONTRACTIONS = re.compile(r"\b\w+'(?:s|t|re|ve|ll|d|m)\b", re.IGNORECASE)
 PRONOUNS = re.compile(r"\b(i|me|my|mine|we|us|our|you|your)\b", re.IGNORECASE)
 NUMBERS = re.compile(r"\b\d[\d,.]*%?\b|\$\d")
-PROPER = re.compile(r"(?<![.!?]\s)(?<!^)\b[A-Z][a-z]{2,}\b", re.MULTILINE)
 
 
 def clamp(n):
@@ -55,7 +57,7 @@ def sentences(text):
 
 
 def words(text):
-    return WORD_RE.findall(text)
+    return unicode_words(text)
 
 
 def check_burstiness(text):
@@ -69,28 +71,29 @@ def check_burstiness(text):
     return score, f"variation {cv:.2f} across {len(lens)} sentences (want 0.55+)"
 
 
-def check_specificity(text):
+def check_specificity(text, language="en"):
     """Numbers, names and concrete nouns. Slop is abstract."""
     w = words(text)
     if len(w) < 25:
         return None, "too short to judge"
     per100 = 100 / len(w)
-    hits = len(NUMBERS.findall(text)) + len(set(PROPER.findall(text)))
+    hits = len(NUMBERS.findall(text)) + len(set(UNICODE_PROPER.findall(text)))
+    if language == "tr":
+        hits += sum(lower(token, language) in TR_NUMBERS | TR_MONEY for token in w)
     density = hits * per100
     score = scale(density, human=6.0, machine=0.5)
     return score, f"{hits} concrete markers, {density:.1f} per 100 words (want 4+)"
 
 
-def check_slop(text, lex):
+def check_slop(text, lex, language="en"):
     """Stock vocabulary density against the lexicon."""
     w = words(text)
     if not w:
-        return None, "no English words to assess"
+        return None, "no words to assess"
     hits, found = 0, []
     for entry in lex["words"] + lex["phrases"]:
-        pattern = re.compile(r"\b" + re.escape(entry["find"]).replace(r"\ ", r"\s+") + r"\b",
-                             re.IGNORECASE)
-        n = len(pattern.findall(text))
+        pattern = phrase_pattern(entry["find"], language)
+        n = len(pattern.findall(match_text(text, language)))
         if n:
             hits += n
             found.append(entry["find"])
@@ -117,8 +120,10 @@ def check_fingerprint(text, preserve_typography=False):
     return score, detail
 
 
-def check_voice(text, lex):
+def check_voice(text, lex, language="en"):
     """Contractions, person, and the shapes models default to."""
+    if language == "tr":
+        return None, "Turkish voice needs manual brand review; no English contraction/pronoun penalty"
     w = words(text)
     if len(w) < 25:
         return None, "too short to judge"
@@ -153,15 +158,15 @@ def check_voice(text, lex):
 CHECKS = ["BURSTINESS", "SPECIFICITY", "SLOP DENSITY", "FINGERPRINT", "VOICE"]
 
 
-def run(text, lex, preserve_typography=False):
+def run(text, lex, preserve_typography=False, language="en"):
     results = {}
     results["BURSTINESS"] = check_burstiness(text)
-    results["SPECIFICITY"] = check_specificity(text)
-    results["SLOP DENSITY"] = check_slop(text, lex)
+    results["SPECIFICITY"] = check_specificity(text, language)
+    results["SLOP DENSITY"] = check_slop(text, lex, language)
     results["FINGERPRINT"] = check_fingerprint(text, preserve_typography)
-    results["VOICE"] = check_voice(text, lex)
+    results["VOICE"] = check_voice(text, lex, language)
     if not words(text):
-        results = {c: (None, "no English words to assess") for c in CHECKS}
+        results = {c: (None, "no words to assess") for c in CHECKS}
     scores = [results[c][0] for c in CHECKS if results[c][0] is not None]
     if not scores:
         return results, None, "INSUFFICIENT TEXT"
@@ -204,13 +209,17 @@ def main():
     ap.add_argument("input", nargs="?", default="-", help="file, or - for stdin")
     ap.add_argument("compare", nargs="?", help="second file, to show before/after")
     ap.add_argument("--json", action="store_true")
-    ap.add_argument("--lexicon", default=LEX)
+    ap.add_argument("--lexicon", help="full lexicon override for the selected language")
     ap.add_argument("--preserve-typography", action="store_true",
                     help="do not penalise em dashes, curly quotes or ellipses")
+    language_argument(ap)
     args = ap.parse_args()
 
-    with open(args.lexicon, encoding="utf-8") as source:
+    lexicon_path = args.lexicon or (str(Path(HERE) / "slop.tr.json") if args.language == "tr" else LEX)
+    with open(lexicon_path, encoding="utf-8") as source:
         lex = json.load(source)
+    if lex.get("language", "en") != args.language:
+        ap.error("lexicon language does not match --language; use a matching account override")
 
     def read(path):
         if path == "-":
@@ -224,9 +233,11 @@ def main():
 
     payload = []
     for name, text in targets:
-        results, overall, verdict = run(text, lex, args.preserve_typography)
+        results, overall, verdict = run(text, lex, args.preserve_typography, args.language)
         payload.append({
             "source": name,
+            "language": args.language,
+            "validation_note": "Editorial heuristics; Turkish scores are not corpus-validated." if args.language == "tr" else "Editorial heuristics, not authorship detection.",
             "checks": {k: {"score": round(v[0], 1) if v[0] is not None else None,
                             "detail": v[1]} for k, v in results.items()},
             "human_score": round(overall, 1) if overall is not None else None,
@@ -238,8 +249,10 @@ def main():
         print(json.dumps(payload if args.compare else payload[0], indent=2))
         return
 
+    if args.language == "tr":
+        print("Dil: tr. Türkçe puanlar deneysel editörlük ipuçlarıdır; üslubu marka örnekleriyle inceleyin.")
     for (name, text), p in zip(targets, payload):
-        results, overall, verdict = run(text, lex, args.preserve_typography)
+        results, overall, verdict = run(text, lex, args.preserve_typography, args.language)
         render(results, overall, verdict, label=os.path.basename(name) if args.compare else None)
     if args.compare:
         a, b = payload
