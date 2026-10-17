@@ -11,6 +11,12 @@ description: >-
 
 # ig-account
 
+For Turkish command help, summaries and common error explanations, use the
+optional [Turkish CLI](references/turkce-kullanim.md), `turkce.py` in this folder.
+It delegates to the existing tools with explicit account/language parameters.
+JSON mode preserves original machine outputs; unsupported scores remain N/A and
+review warnings must not be treated as approval. Original commands still work.
+
 ## Content language
 
 Use the language explicitly requested for this content, then the selected
