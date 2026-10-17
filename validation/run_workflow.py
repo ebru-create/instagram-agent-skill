@@ -130,7 +130,12 @@ def run(out, font):
             jobs.append(manifest)
         report['checks'].append({'stage': 'content-and-exports', 'exports': len(jobs), 'slides': sum(len(j['slides']) for j in jobs), 'caption_verdict': lint['verdict']})
         # Fixed fictional rows are selected by scenario IDs, not by observed performance.
-        fixture = skills / 'ig-audit/example.synthetic.csv'
+        imported = workflow.call('import-localized-csv', tool('ig-audit/import_csv.py'),
+                                 skills / 'ig-audit/import.example.tr.csv', '--mapping',
+                                 skills / 'ig-audit/import.mapping.example.tr.json', '--account', account,
+                                 '--out', out / 'imported')
+        require(imported['status'] == 'exported', 'localized CSV import did not complete')
+        fixture = out / 'imported/canonical.csv'
         rows = list(csv.DictReader(io.StringIO(fixture.read_text(encoding='utf-8'))))
         selected = [row for row in rows if row['post_id'] in {s['post_id'] for s in scenario['slots']}]
         require(len(selected) == len(scenario['slots']), 'scenario post IDs do not match CSV fixture')

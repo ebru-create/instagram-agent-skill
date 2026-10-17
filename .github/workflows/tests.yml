@@ -22,6 +22,7 @@ jobs:
       - run: python evaluation/evaluate.py evaluation/fixtures.json --out evaluation-report.json
       - run: python skills/ig-account/publication.py check skills/ig-account/example.publication.tr.json --account ornek_studyo
       - run: python skills/ig-account/turkce.py analiz skills/ig-audit/example.synthetic.csv --hesap ornek_studyo --olcut paylasim_orani
+      - run: python skills/ig-account/turkce.py ice-aktar skills/ig-audit/import.example.tr.csv --esleme skills/ig-audit/import.mapping.example.tr.json --hesap ornek_studyo --cikti csv-import-example
       - run: python skills/ig-audit/analyse.py skills/ig-audit/example.synthetic.csv --account ornek_studyo --primary-metric shares_per_reach > analytics-example.json
       - run: python skills/ig-plan/experiment.py skills/ig-plan/example.experiment.tr.json --account ornek_studyo --csv skills/ig-audit/example.synthetic.csv --as-of 2026-09-13T12:00:00+03:00 > experiment-example.json
       - run: python skills/ig-carousel/render.py skills/ig-carousel/example.tr.json --font /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf --out carousel-example
@@ -47,3 +48,7 @@ jobs:
         with:
           name: workflow-synthetic-python-${{ matrix.python-version }}
           path: workflow-example
+      - uses: actions/upload-artifact@v4
+        with:
+          name: csv-import-synthetic-python-${{ matrix.python-version }}
+          path: csv-import-example

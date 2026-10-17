@@ -58,6 +58,7 @@ def bundle(source=ROOT):
                 "ig-human/humanize.py", "ig-human/detect.py", "ig-reel/hookscore.py",
                 "ig-reel/beats.py", "ig-caption/caption.py", "ig-viral/swipe.py",
                 "ig-audit/analyse.py", "ig-audit/template.csv", "ig-audit/example.synthetic.csv",
+                "ig-audit/import_csv.py", "ig-audit/import.example.tr.csv", "ig-audit/import.mapping.example.tr.json",
                 "ig-plan/experiment.py", "ig-plan/example.experiment.tr.json",
                 "ig-account/publication.py", "ig-account/example.publication.tr.json",
                 "ig-account/turkce.py",

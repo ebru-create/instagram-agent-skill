@@ -69,6 +69,13 @@ ERRORS = (
     ('lexicon language', 'Sözcük listesi seçilen içerik diliyle uyuşmuyor.'),
     ('--data-root requires', '--kok seçeneğiyle birlikte --hesap seçilmelidir.'),
     ('unsupported primary metric', 'Ana ölçüt tanınmıyor. --olcut için geçerli bir ölçüt adı seçin.'),
+    ('mapped source columns not found', 'Eşleştirmede seçilen kaynak sütunlar bulunamadı. Önizlemedeki sütun adlarını kullanın.'),
+    ('mapping fields', 'Eşleştirme dosyasının alanları şemayla uyuşmuyor. import.mapping.example.tr.json örneğini temel alın.'),
+    ('--mapping requires --account', '--esleme ile birlikte --hesap seçilmelidir.'),
+    ('inspection does not accept', '--hesap ve --cikti için --esleme dosyası gerekir. Sütun incelemesi varsayılan olarak salt okunurdur.'),
+    ('inspection-only', '--ayirici ve --kodlama yalnızca sütun incelemesinde kullanılır; dönüşüm için bunları eşleştirme dosyasında belirtin.'),
+    ('unexpected end of data', 'CSV tırnakları tamamlanmamış. Kaynak dosyanın biçimini kontrol edin.'),
+    ("can't decode", 'Dosya seçilen kodlamayla okunamadı. İncelemede --kodlama, eşleştirmede encoding alanını kontrol edin.'),
 )
 
 
@@ -123,7 +130,8 @@ def parser():
     labels = {'hesap': 'yerel hesap profilleri', 'aciklama': 'açıklama denetimi', 'temizle': 'metni temizle',
               'metin': 'metin için editoryal denetim', 'giris': 'giriş cümlesini değerlendir', 'ritim': 'konuşma süresi tahmini',
               'arastirma': 'TSV araştırmasını karşılaştır', 'karusel': 'PNG dışa aktar', 'analiz': 'CSV oranlarını hesapla',
-              'deneme': 'içerik denemesini kontrol et', 'yayin': 'bildirilen yayınları kaydet/eşleştir'}
+              'deneme': 'içerik denemesini kontrol et', 'yayin': 'bildirilen yayınları kaydet/eşleştir',
+              'ice-aktar': 'CSV sütunlarını incele, eşleştir ve kanonik biçime dönüştür'}
     for name, label in labels.items():
         sub = commands.add_parser(name, help=label, description=label.capitalize())
         if name in ('hesap', 'yayin'):
@@ -173,6 +181,12 @@ def parser():
             mode = sub.add_mutually_exclusive_group(required=True)
             mode.add_argument('--kontrol', action='store_true', help='dosya üretmeden yerleşimi kontrol et')
             mode.add_argument('--cikti', help='yeni dışa aktarma klasörü')
+        if name == 'ice-aktar':
+            sub.add_argument('--esleme', help='açık sütun/sayı/tarih eşleştirme JSON dosyası')
+            sub.add_argument('--hesap', help='eşleştirme ile dönüştürülecek yayın hesabı')
+            sub.add_argument('--cikti', help='hata yoksa kanonik CSV ve rapor için yeni klasör')
+            sub.add_argument('--ayirici', choices=(',', ';', 'sekme'), help='yalnızca sütun incelemesi; varsayılan virgül')
+            sub.add_argument('--kodlama', choices=('utf-8', 'utf-8-sig', 'cp1254'), help='yalnızca sütun incelemesi; varsayılan utf-8-sig')
     return root
 
 
@@ -200,7 +214,8 @@ def invocation(args):
         return SKILLS / 'ig-account/publication.py', options
     paths = {'aciklama': 'ig-caption/caption.py', 'temizle': 'ig-human/humanize.py', 'metin': 'ig-human/detect.py',
              'giris': 'ig-reel/hookscore.py', 'ritim': 'ig-reel/beats.py', 'arastirma': 'ig-viral/swipe.py',
-             'karusel': 'ig-carousel/render.py', 'analiz': 'ig-audit/analyse.py', 'deneme': 'ig-plan/experiment.py'}
+             'karusel': 'ig-carousel/render.py', 'analiz': 'ig-audit/analyse.py', 'deneme': 'ig-plan/experiment.py',
+             'ice-aktar': 'ig-audit/import_csv.py'}
     options = [args.dosya]
     if name in ('aciklama', 'temizle', 'metin', 'giris', 'ritim', 'arastirma'):
         options += ['--language', args.dil, '--json']
@@ -219,6 +234,11 @@ def invocation(args):
         options += ['--data-root' if name == 'arastirma' else '--root', args.kok]
     if name == 'analiz':
         options += ['--primary-metric', METRICS.get(args.olcut, args.olcut)]
+    if name == 'ice-aktar':
+        for attribute, flag in (('esleme', '--mapping'), ('ayirici', '--delimiter'), ('kodlama', '--encoding')):
+            value = getattr(args, attribute)
+            if value is not None:
+                options += [flag, '\t' if value == 'sekme' else value]
     return SKILLS / paths[name], options
 
 
@@ -246,7 +266,28 @@ def summary(args, data):
         if args.command == 'yayin':
             lines.append('Kullanıcı bildirimi; platformdan doğrulanmadı.')
         return '\n'.join(lines)
-    if args.command == 'hesap':
+    if args.command == 'ice-aktar':
+        states = {'inspected': 'Kaynak sütunlar incelendi; eşleştirme henüz yapılmadı.', 'ready': 'Dönüşüm kontrolleri geçti; dosya henüz yazılmadı.',
+                  'blocked': 'Dönüşüm engellendi; hatalar düzeltilmeden CSV üretilmez.', 'exported': 'Kanonik CSV ve içe aktarma raporu oluşturuldu.'}
+        lines += [states[data['status']], 'Kaynak sütunlar: ' + ', '.join(data['source_columns']),
+                  f"Kaynak kayıt sayısı: {data['source_record_count']}."]
+        if data['status'] == 'inspected':
+            lines += [json.dumps(row, ensure_ascii=False) for row in data['source_preview']]
+        else:
+            labels = {'number_format': 'Sayı biçimi seçilen yerel biçimle uyuşmuyor; kısaltmalar desteklenmez.',
+                      'count_fraction': 'Adet alanı kesirli; yuvarlama yapılmadı.', 'date_format': 'Tarih/saat biçimini ve saat dilimini kontrol edin.',
+                      'value_map': 'Kaynak etiket açık değer eşleştirmesinde yok.', 'row_width': 'Hücre sayısı başlıkla uyuşmuyor.',
+                      'canonical_validation': 'Hesap, kimlik, ölçüm tutarlılığı veya zorunlu alan doğrulaması geçmedi; ayrıntı için --ayrinti.'}
+            lines += [f"Dönüştürülebilen kayıt: {data['converted_record_count']}; hata: {data['error_count']}.",
+                      'Eşleştirilmeyen kaynak sütunlar: ' + (', '.join(data['unmapped_source_columns']) or 'Yok')]
+            lines += [f"Satır {error['source_line'] or 'genel'}, alan {error['field'] or 'genel'}: " +
+                      (localized_error(error['message']) if error['code'] == 'canonical_validation' else labels[error['code']]) for error in data['errors']]
+            lines.append('En çok 5 dönüştürülmüş kayıt ve 20 hata gösterilir; tek bir hata bile dışa aktarmayı engeller.')
+            lines += [json.dumps(row, ensure_ascii=False) for row in data['canonical_preview']]
+            if data.get('output_directory'):
+                lines.append('Kayıt konumu: ' + data['output_directory'])
+        lines.append('Kaynak dosya değiştirilmedi. Ölçüm tanımları, hesap sahipliği ve ilişkilendirme kullanıcı beyanıdır.')
+    elif args.command == 'hesap':
         if args.action == 'listele':
             return '\n'.join('@' + account for account in data['accounts']) or 'Kayıtlı hesap yok.'
         names = {'voice': 'Marka sesi', 'strategy': 'Strateji', 'plan': 'Plan', 'swipe': 'Araştırma',

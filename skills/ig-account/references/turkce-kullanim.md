@@ -114,8 +114,12 @@ ile birlikte kullanılmalıdır. Takipçi ve medyan temelleri ayrı tutulur.
   komutlar ve varsayılanları değişmedi. Bu arayüzde konuşma hızı varsayılanı
   açıkça 140 sözcük/dakikadır; kendi ölçümünüzü --hiz ile girin.
 
-CSV şeması, tarih biçimleri, Türkçe sayı kısaltmalarının içe aktarılması veya
-Instagram bağlantıları bu değişiklikte eklenmez. Kanonik CSV ve JSON şemaları
+`ice-aktar` komutu, kaynak CSV için sütun incelemesi, açık sayı/tarih/saat dilimi
+eşleştirmesi, salt okunur önizleme ve hatasız kanonik dosya üretimi sağlar.
+Örnek: `ice-aktar kaynak.csv --esleme esleme.json --hesap HESAP_ADI`.
+Kayıt için ayrıca `--cikti /path/to/yeni-aktarim` verin. Ayrıntılı
+[CSV içe aktarma kılavuzunu](../../ig-audit/references/csv-import.md) izleyin.
+Türkçe sayı kısaltmaları tahmin edilmez; Instagram bağlantısı eklenmez. Kanonik CSV ve JSON şemaları
 için [CSV analizi](../../ig-audit/references/csv-analysis.md),
 [yayın kaydı](publications.md) ve [deneme](../../ig-plan/references/experiments.md)
 kılavuzlarını kullanın.

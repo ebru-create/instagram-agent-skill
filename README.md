@@ -453,6 +453,21 @@ before posting and enter the supplied alt text in your publishing workflow.
 
 ## Local account analytics
 
+For unfamiliar CSV headers or localized numbers/dates, inspect and map first:
+
+```bash
+python3 skills/ig-account/turkce.py ice-aktar skills/ig-audit/import.example.tr.csv --ayirici ';'
+python3 skills/ig-account/turkce.py ice-aktar skills/ig-audit/import.example.tr.csv --esleme skills/ig-audit/import.mapping.example.tr.json --hesap ornek_studyo
+```
+
+These examples are fictional. Preview writes nothing; add `--cikti NEW_DIR` to
+export `canonical.csv` and a provenance report only after all records validate.
+Source fields, delimiter, encoding, numeric locale, date format, timezone and
+known constants are explicit. Unknown abbreviations and fractional counts are
+rejected; missing values and zero stay distinct. No rows are silently filtered.
+Existing files/source data are preserved. This is not automatic recognition of
+all platform export formats. See the [Turkish CSV import guide](skills/ig-audit/references/csv-import.md).
+
 `ig-audit/analyse.py` calculates rates and comparable peer baselines from a
 user-mapped CSV. No login, network calls or additional Python packages are needed.
 It requires an explicit account and primary metric:

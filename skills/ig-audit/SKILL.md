@@ -70,7 +70,14 @@ interpreting results. Disclose conflicts and unmatched IDs; resolve confirmed
 corrections without silently dropping rows. A matching local record is still
 user-reported identity context, not platform verification or performance evidence.
 
-For supplied CSV data, use [the local CSV workflow](references/csv-analysis.md)
+For supplied CSV data, first inspect unfamiliar headers with
+[CSV import and mapping](references/csv-import.md). Build explicit column,
+number/date/timezone mappings from the supplied file and known context; do not
+guess uncertain definitions or manufacture account ownership. Preview conversions
+and missing coverage before exporting a new canonical CSV. Any import error
+blocks export; never select only successfully converted rows for an audit.
+Existing canonical files can proceed directly to
+[the local CSV workflow](references/csv-analysis.md)
 and `analyse.py` for calculations. Map confirmed source fields to `template.csv`;
 native exports may need adaptation. Pass the publishing `--account` and a
 goal-aligned `--primary-metric`. Default output is read-only JSON; `--save` creates

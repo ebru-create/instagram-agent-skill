@@ -38,6 +38,8 @@ komut kayıtları inceleme için korunur. Eksik yazı tipi gibi başlangıç hat
 - Yanlış hesap ve yinelenen kayıt reddi; organik/ücretli uyuşmazlığının görünür olması.
 - Diğer hesabın, mevcut planın ve ilk deneme kaydının korunması.
 
+Senaryo, önce Türkçe başlıklı ve yerel sayı/tarih biçimli kurgusal CSV'yi açık
+eşleştirmeyle kanonik biçime dönüştürür; sonraki adımlar bu dosyayı kullanır.
 `scenario.tr.json` içindeki kimlikler, tarihler, bütçe ve metinler senaryo
 girdileridir. Mevcut kurgusal CSV'den yalnızca bu iki sabit kimlik seçilir;
 gözlenen performansa göre örnek seçimi yapılmaz. `--as-of` tarihleri tarihsel

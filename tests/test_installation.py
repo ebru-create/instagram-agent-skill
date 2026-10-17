@@ -291,6 +291,18 @@ class InstalledBundleIntegrationTests(unittest.TestCase):
                          "--hesap", "ornek_studyo", "--kok", str(data_root), "--json", cwd=directory)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(json.loads(result.stdout), report)
+            imported = Path(directory) / "imported"
+            result = cli(str(destination / "ig-account/turkce.py"), "ice-aktar",
+                         str(destination / "ig-audit/import.example.tr.csv"), "--esleme",
+                         str(destination / "ig-audit/import.mapping.example.tr.json"),
+                         "--hesap", "ornek_studyo", "--cikti", str(imported), "--json", cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["status"], "exported")
+            result = cli(str(destination / "ig-account/turkce.py"), "analiz",
+                         str(imported / "canonical.csv"), "--hesap", "ornek_studyo",
+                         "--olcut", "paylasim_orani", "--json", cwd=directory)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout)["posts"][0]["metrics"]["shares_per_reach"], .02)
 
     def test_cli_flags_reject_ambiguous_replacement(self):
         with tempfile.TemporaryDirectory() as directory:

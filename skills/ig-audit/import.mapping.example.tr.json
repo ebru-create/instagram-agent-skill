@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "delimiter": ";",
+  "encoding": "utf-8-sig",
+  "number_format": "tr",
+  "date_format": "%d.%m.%Y %H:%M",
+  "timezone": "+03:00",
+  "measurement_scope": "cumulative_since_publication",
+  "columns": {
+    "post_id": "Paylaşım", "format": "Tür", "distribution": "Dağıtım",
+    "published_at": "Yayın zamanı", "captured_at": "Ölçüm zamanı",
+    "views": "Görüntüleme", "reach": "Erişim", "shares": "Paylaşma",
+    "saves": "Kaydetme", "duration_seconds": "Video süresi", "average_watch_seconds": "Ortalama izleme"
+  },
+  "constants": {"account": "ornek_studyo"},
+  "value_maps": {"format": {"Karusel": "carousel", "Reels": "reel"}, "distribution": {"Organik": "organic", "Ücretli": "paid"}},
+  "missing_values": ["", "—"]
+}
