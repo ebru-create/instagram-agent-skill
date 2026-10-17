@@ -115,6 +115,15 @@ account	followers	median	views	hook
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 ```
 
+Counts accept plain integers, comma thousands (`1,200`) and decimal K/M/B
+abbreviations (`1.2M`). Convert localized or ambiguous counts to full integers;
+the script rejects them instead of guessing. Zero views are retained.
+
+It ranks median-based and follower-based ratios separately, labels each row's
+baseline type and leaves missing-baseline rows unranked. Follower ratios are
+proxies, not account-median outliers. Compare top/bottom patterns only within
+the same baseline group. JSON summaries are inside `groups`.
+
 It computes the outlier multiple, names the hook formula using the same 26
 formulas `/ig-reel` writes from, scores each hook with `hookscore.py`, and
 prints what separates the top third from the bottom third.

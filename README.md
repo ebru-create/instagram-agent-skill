@@ -10,10 +10,9 @@ the caption and shows you exactly what the feed shows before the "... more".
 One scores your profile out of 100 and rewrites what lost points. One plans the
 week.
 
-And one is the humanizer, which is the reason the rest are usable. It strips
-the em dashes, the slop vocabulary and the invisible watermark characters out
-of a draft, then scores what is left against a five-check panel before you ever
-see it.
+And one is the humanizer. It cleans stock vocabulary and copy-paste artefacts
+while preserving meaningful Unicode, then reports the applicable checks from
+a five-check panel. Typography normalization is optional.
 
 **Nothing gets posted until you say yes.** These skills write. You post.
 
@@ -22,7 +21,7 @@ see it.
 Paste this into Claude:
 
 ```
-https://github.com/Jakeschincariol/instagram-agent-skill
+https://github.com/ebru-create/instagram-agent-skill
 
 Install this skill, then confirm /ig-reel works.
 ```
@@ -30,14 +29,14 @@ Install this skill, then confirm /ig-reel works.
 Or do it yourself, in Claude Code:
 
 ```bash
-git clone https://github.com/Jakeschincariol/instagram-agent-skill.git
+git clone https://github.com/ebru-create/instagram-agent-skill.git
 cp -r instagram-agent-skill/skills/ig-* ~/.claude/skills/
 ```
 
 Or as a plugin:
 
 ```
-/plugin marketplace add Jakeschincariol/instagram-agent-skill
+/plugin marketplace add ebru-create/instagram-agent-skill
 /plugin install instagram-agent
 ```
 
@@ -160,12 +159,13 @@ python3 detect.py before.txt after.txt       # prove the delta
 
 **What comes out automatically:**
 
-- **Invisible characters.** Zero-width spaces and joiners, word joiners, soft
-  hyphens, byte-order marks, Unicode tag characters, invisible separators,
-  non-breaking and narrow spaces. Your keyboard does not make these. They
-  survive copy-paste and they are invisible in every editor you own.
+- **Copy-paste cleanup.** Removes zero-width spaces, word joiners, soft
+  hyphens, byte-order marks and invisible separators; normalizes unusual spaces.
+  Preserves joiners, non-joiners, direction controls and emoji tag sequences.
+  Invisible characters alone do not establish AI authorship.
 - **Typography.** Em dash to comma, en dash to hyphen, curly quotes to
-  straight, ellipsis to three dots, and the orphaned punctuation that leaves.
+  straight, ellipsis to three dots. Use `--preserve-typography` with both
+  `humanize.py` and `detect.py` when those characters belong to your voice.
 - **The lexicon.** 154 stock words and phrases with plain-English replacements.
   The last block of it is Instagram-specific: "stop scrolling", "in today's
   video", "follow for more", "tag someone who needs this", "the algorithm
@@ -296,10 +296,13 @@ what they measure tends to move those numbers, because they are measuring the
 same underlying things. That is the whole claim. Nobody can honestly sell you
 "undetectable", and anybody who does is selling you something.
 
-**The invisible-character pass is real and it is narrow.** It removes the
-zero-width and format characters that end up in generated text and survive a
-copy-paste. That is a genuine, checkable fingerprint. It is not a claim about
-defeating a cryptographic watermarking scheme, and this repo does not make one.
+**Unicode cleanup is conservative.** Joining and direction characters can
+carry meaning in emoji and languages. They are preserved, as are unlisted
+format characters. This cleanup is not watermark detection or removal.
+
+**Short text gets limited coverage.** Checks that need more text report `N/A`
+(JSON `null`) and are excluded from scoring. A PASS covers only the checks that
+ran; empty text gets `INSUFFICIENT TEXT`. Do not lengthen copy to satisfy a score.
 
 **Nothing here fabricates.** No invented metrics, clients or outcomes go under
 your name. If a draft needs a number you have not given, it comes back with
@@ -318,7 +321,7 @@ skills/ig-reel/hooks.json          26 hook formulas: template, example, on-scree
 skills/ig-reel/hookscore.py        the five-property hook panel
 skills/ig-reel/beats.py            script to timed beat sheet
 skills/ig-caption/caption.py       the truncation preview and the caption linter
-skills/ig-human/slop.json          the lexicon: 154 terms, 18 invisible classes, 16 tells
+skills/ig-human/slop.json          the lexicon: 154 terms, 11 cleanup classes, 16 tells
 skills/ig-human/humanize.py        the three cleaning passes
 skills/ig-human/detect.py          the five-check panel
 skills/ig-viral/swipe.py           outlier ranking and formula classification
@@ -328,10 +331,28 @@ templates/voice.md                 your voice profile. Fill this in first.
 
 ## Credit
 
-Made by Jake Schincariol, [opusjake.ai](https://opusjake.ai).
+This fork is maintained at [ebru-create/instagram-agent-skill](https://github.com/ebru-create/instagram-agent-skill).
+
+Originally made by Jake Schincariol, [opusjake.ai](https://opusjake.ai).
+Upstream: [Jakeschincariol/instagram-agent-skill](https://github.com/Jakeschincariol/instagram-agent-skill).
 
 Sibling repo, same idea for a different platform:
 [linkedin-agent-skill](https://github.com/Jakeschincariol/linkedin-agent-skill).
+
+## Regression tests
+
+Run the dependency-free suite from the repository root:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Research counts accept `1,200`, `1.2K`, `1.2M` and `1.2B`. Ambiguous formats
+such as `1,2M` are rejected with a row/field error. Median-based and
+follower-based ratios are ranked in separate groups; follower ratios are
+proxies, not account-median outliers. Missing baselines remain unranked.
+`swipe.py --json` includes per-row `baseline_type` and per-cohort `groups`;
+top/bottom summaries live inside each group, never across mixed baselines.
 
 ## License
 

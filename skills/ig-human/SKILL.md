@@ -2,7 +2,7 @@
 name: ig-human
 description: >-
   Strip the machine fingerprint out of any draft - em dashes, AI slop words,
-  invisible watermark characters - and score it against a five-check detection
+  copy-paste artefacts - and score it against a five-check detection
   panel before it goes out. Use whenever text needs to sound human, when the
   user says humanize, "does this sound like AI", "remove the em dashes",
   "de-slop this", "this sounds like ChatGPT", or before any caption, script,
@@ -21,7 +21,7 @@ python3 detect.py before.txt after.txt         # prove the delta
 ```
 
 Both read `slop.json`: 154 stock words and phrases with plain-English
-replacements, 18 invisible character classes, 11 typographic substitutions and
+replacements, 11 cleanup character classes, 11 typographic substitutions and
 16 structural tells. The last block of each list is Instagram-specific, the
 vocabulary that only shows up in captions and voiceovers. It is meant to be
 edited. If the user has a word they always use that the lexicon strips, take it
@@ -38,17 +38,16 @@ their own script.
 
 ## What gets fixed automatically
 
-**1. Invisible characters.** Zero-width spaces and joiners, word joiners, soft
-hyphens, byte-order marks, Unicode tag characters, invisible separators,
-non-breaking and narrow spaces. A keyboard does not produce these. They survive
-copy-paste, they are invisible in every editor, and they are the most
-mechanical thing in generated text. `humanize.py` deletes every one, including
-any remaining Unicode format character it does not have a name for.
+**1. Copy-paste cleanup.** Removes zero-width spaces, word joiners, soft
+hyphens, byte-order marks and invisible separators; normalizes unusual spaces.
+Joiners, non-joiners, direction controls, Mongolian separators and emoji tag
+characters are preserved. Unlisted format characters are left unchanged.
+Invisible characters alone are not evidence of AI authorship or watermarks.
 
 **2. Typography.** Em dash to comma, en dash to hyphen, curly quotes to
-straight, ellipsis to three dots, bullet character to hyphen. The em dash pass
-is the one that matters: it collapses the dash to a comma and then cleans up
-the double punctuation and orphaned periods that leaves behind.
+straight, ellipsis to three dots, bullet character to hyphen. If punctuation
+is part of the user's voice, pass `--preserve-typography` to both scripts.
+This keeps typography and excludes those punctuation penalties from scoring.
 
 **3. The slop lexicon.** delve, leverage, robust, seamless, crucial, testament
 to, "in today's fast-paced world", plus the Instagram block: "stop scrolling",
@@ -86,9 +85,12 @@ PASS, and it is the part a script cannot do.
 | FINGERPRINT | invisible chars, em dashes, curly quotes per 1k chars | typographically perfect |
 | VOICE | contractions, person, structural tells | no contractions, staged reveals |
 
-The verdict weights the mean at 60% and the **weakest single check** at 40%,
-because one signal is enough. PASS needs an overall of 70+ with no check
-below 55.
+Checks without enough text report `N/A` (JSON `null`) and are excluded.
+The verdict weights the mean of applicable checks at 60% and the weakest
+applicable check at 40%. PASS needs an overall of 70+ with no applicable check
+below 55. Always show coverage: a short DM may pass only two of five checks.
+Empty text or text without English words gets `INSUFFICIENT TEXT`, not a pass.
+These English heuristics do not establish human authorship.
 
 ## Say this honestly
 
@@ -105,7 +107,9 @@ do not tell a user their text is undetectable.
 1. `humanize.py draft.txt -o clean.txt --report`
 2. Read the structural flags. Rewrite those lines yourself.
 3. `detect.py draft.txt clean.txt` to show the before and after.
-4. If the verdict is not PASS, fix the weakest check named in the output and go
-   again. Two rounds is normal. Five means the draft was written by formula,
-   and the fix is a different draft, not more passes.
+4. Make at most two revision rounds after the initial check. Fix relevant
+   findings while preserving meaning and voice. Never pad short copy, invent
+   numbers or change meaningful Unicode to raise a score. N/A is not a defect.
+   If concerns remain, show them with the draft instead of repeating the loop.
+   For `INSUFFICIENT TEXT`, skip score-driven rewriting and review manually.
 5. Show the user the cleaned text and the score. Never the score alone.

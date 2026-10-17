@@ -26,6 +26,7 @@ Usage
 """
 
 import argparse
+from decimal import Decimal
 import json
 import os
 import re
@@ -45,7 +46,8 @@ except Exception:                                 # ig-viral copied on its own
 
 def load_formulas(path):
     try:
-        d = json.load(open(path, encoding="utf-8"))
+        with open(path, encoding="utf-8") as source:
+            d = json.load(source)
     except Exception:
         return None
     by_id = {h["id"]: h for h in d["hooks"]}
@@ -63,8 +65,32 @@ def classify(hook, formulas):
     return None, "unclassified"
 
 
+def parse_count(value):
+    """Parse non-negative counts with comma grouping or decimal K/M/B suffixes.
+
+    Decimal commas and locale-specific abbreviations are ambiguous; reject
+    them instead of silently changing their magnitude.
+    """
+    value = value.strip()
+    if not value:
+        return None
+    match = re.fullmatch(r"(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*([kKmMbB])?", value)
+    if not match or (match[2] and not match[3]):
+        raise ValueError(f"invalid count {value!r}; use 1,200, 1.2K or 1.2M")
+    number = Decimal(match[1].replace(",", "") + (match[2] or ""))
+    number *= {None: 1, "k": 1000, "m": 1000000, "b": 1000000000}[
+        match[3].lower() if match[3] else None]
+    if number != number.to_integral_value():
+        raise ValueError(f"count {value!r} does not resolve to a whole number")
+    return int(number)
+
+
 def read_rows(path):
-    raw = sys.stdin.read() if path == "-" else open(path, encoding="utf-8").read()
+    if path == "-":
+        raw = sys.stdin.read()
+    else:
+        with open(path, encoding="utf-8") as source:
+            raw = source.read()
     lines = [l for l in raw.splitlines() if l.strip() and not l.lstrip().startswith("#")]
     if not lines:
         return []
@@ -74,28 +100,27 @@ def read_rows(path):
     else:
         cols, body = ["account", "followers", "views", "hook"], lines
     rows = []
-    for line in body:
+    for line_number, line in enumerate(body, 2 if body is not lines else 1):
         cells = line.split("\t")
         if len(cells) < len(cols):
             cells += [""] * (len(cols) - len(cells))
         r = dict(zip(cols, [c.strip() for c in cells]))
-        try:
-            r["views"] = int(re.sub(r"[^\d]", "", r.get("views", "")) or 0)
-        except ValueError:
-            continue
-        for k in ("followers", "median"):
-            digits = re.sub(r"[^\d]", "", r.get(k, "") or "")
-            r[k] = int(digits) if digits else None
-        if r["views"] and r.get("hook"):
+        for key in ("views", "followers", "median"):
+            try:
+                r[key] = parse_count(r.get(key, ""))
+            except ValueError as exc:
+                raise ValueError(f"row {line_number}, {key}: {exc}") from exc
+        if r["views"] is not None and r.get("hook"):
             rows.append(r)
     return rows
 
 
 def analyse(rows, formulas):
-    used_median = any(r.get("median") for r in rows)
     for r in rows:
         base = r.get("median") or r.get("followers") or 0
         r["baseline"] = base
+        r["baseline_type"] = ("account median" if r.get("median") else
+                              "follower count" if r.get("followers") else "unavailable")
         r["outlier"] = round(r["views"] / base, 2) if base else None
         r["formula_id"], r["formula"] = classify(r["hook"], formulas)
         r["words"] = len(WORD_RE.findall(r["hook"]))
@@ -104,9 +129,28 @@ def analyse(rows, formulas):
             r["hook_score"], r["hook_verdict"] = round(overall, 1), verdict
         else:
             r["hook_score"], r["hook_verdict"] = None, None
-    ranked = sorted(rows, key=lambda r: -(r["outlier"] or 0))
-    third = max(1, len(ranked) // 3)
-    top, bottom = ranked[:third], ranked[-third:]
+    groups = []
+    for baseline in ("account median", "follower count", "unavailable"):
+        cohort = [r for r in rows if r["baseline_type"] == baseline]
+        if not cohort:
+            continue
+        ranked = sorted(cohort, key=lambda r: -(r["outlier"] or 0))
+        groups.append(summarise(ranked, baseline))
+    return {
+        "baseline": groups[0]["baseline"] if len(groups) == 1 else "mixed (ranked separately)",
+        "n": len(rows),
+        "accounts": len({r.get("account", "") for r in rows}),
+        "reels": [r for g in groups for r in g["reels"]],
+        "groups": groups,
+    }
+
+
+def summarise(ranked, baseline):
+    # A single row cannot be both the best and worst evidence.
+    third = len(ranked) // 3 or 1
+    can_compare = len(ranked) >= 2 and baseline != "unavailable"
+    top = ranked[:third] if can_compare else []
+    bottom = ranked[-third:] if can_compare else []
 
     def med(items, key):
         vals = [i[key] for i in items if i.get(key) is not None]
@@ -116,7 +160,7 @@ def analyse(rows, formulas):
     for r in top:
         counts[r["formula"]] = counts.get(r["formula"], 0) + 1
     return {
-        "baseline": "account median" if used_median else "follower count",
+        "baseline": baseline,
         "n": len(ranked),
         "accounts": len({r.get("account", "") for r in ranked}),
         "reels": ranked,
@@ -130,27 +174,36 @@ def analyse(rows, formulas):
 
 
 def render(a, out=sys.stdout):
+    if "groups" in a:
+        for group in a["groups"]:
+            render(group, out)
+        return
     head = (f"SWIPE FILE  ·  {a['n']} reels  ·  {a['accounts']} accounts  ·  "
             f"baseline: {a['baseline']}")
     print("\n" + head, file=out)
     print("=" * max(len(head), 78), file=out)
     for r in a["reels"]:
-        mult = f"{r['outlier']:.1f}x" if r["outlier"] else "   ?"
+        mult = f"{r['outlier']:.1f}x" if r["outlier"] is not None else "   ?"
         score = f"{r['hook_score']:.0f}" if r["hook_score"] is not None else " -"
         fid = f"#{r['formula_id']:<2}" if r["formula_id"] else "-  "
         print(f"  {mult:>7}  hook {score:>3}  {fid} {r['formula'][:22]:<22} "
               f"{r.get('account', '')[:16]:<16} {r['views']:>9,}", file=out)
         print(f"           \"{r['hook'][:96]}\"", file=out)
     print("-" * max(len(head), 78), file=out)
-    print("WHAT IS WORKING IN THIS BATCH", file=out)
+    print("WITHIN THIS BASELINE GROUP", file=out)
+    if a["baseline"] == "follower count":
+        print("  Views / followers is a proxy, not an account-median outlier.", file=out)
+    if not a["top_formulas"]:
+        print("  Not enough comparable rows for a top/bottom comparison.", file=out)
     if a["top_formulas"]:
         print("  top third by outlier:  "
               + ", ".join(f"{n} x{c}" for n, c in a["top_formulas"][:4]), file=out)
     if a["top_hook_score"] is not None:
         print(f"  median hook score:     top {a['top_hook_score']:.0f}  "
               f"vs bottom {a['bottom_hook_score']:.0f}", file=out)
-    print(f"  median hook length:    top {a['top_words']} words  "
-          f"vs bottom {a['bottom_words']} words", file=out)
+    if a["top_words"] is not None:
+        print(f"  median hook length:    top {a['top_words']} words  "
+              f"vs bottom {a['bottom_words']} words", file=out)
     print(f"  unclassified:          {a['unclassified']} of {a['n']}. Read those by hand, "
           "they are where a formula you do not have yet is hiding.", file=out)
     print("\n  A hand-collected batch is evidence, not proof. Twelve reels shows you "
@@ -159,15 +212,18 @@ def render(a, out=sys.stdout):
 
 
 def to_markdown(a):
-    lines = ["# Swipe file", "",
-             f"{a['n']} reels across {a['accounts']} accounts. "
-             f"Ranked by multiple over {a['baseline']}.", ""]
-    for r in a["reels"]:
-        mult = f"{r['outlier']:.1f}x" if r["outlier"] else "?"
-        lines += [f"## {mult}  {r['formula']}  ({r.get('account', '')})",
-                  f"- views: {r['views']:,}  baseline: {r['baseline']:,}",
-                  f"- hook score: {r['hook_score']}  words: {r['words']}",
-                  f"- hook: \"{r['hook']}\"", ""]
+    lines = ["# Swipe file", "", f"{a['n']} reels across {a['accounts']} accounts.",
+             "Ranked separately within each baseline type; groups are not comparable.", ""]
+    for group in a["groups"]:
+        lines += [f"## Baseline: {group['baseline']}", ""]
+        if group["baseline"] == "follower count":
+            lines += ["Views / followers is a proxy, not an account-median outlier.", ""]
+        for r in group["reels"]:
+            mult = f"{r['outlier']:.1f}x" if r["outlier"] is not None else "?"
+            lines += [f"### {mult}  {r['formula']}  ({r.get('account', '')})",
+                      f"- views: {r['views']:,}  baseline: {r['baseline']:,} ({r['baseline_type']})",
+                      f"- hook score: {r['hook_score']}  words: {r['words']}",
+                      f"- hook: \"{r['hook']}\"", ""]
     return "\n".join(lines) + "\n"
 
 
@@ -179,7 +235,10 @@ def main():
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
 
-    rows = read_rows(args.input)
+    try:
+        rows = read_rows(args.input)
+    except ValueError as exc:
+        ap.error(str(exc))
     if not rows:
         print("no usable rows. Need a tab-separated file with at least views and hook.",
               file=sys.stderr)
@@ -197,8 +256,9 @@ def main():
         render(a)
     if args.out:
         path = os.path.expanduser(args.out)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        open(path, "w", encoding="utf-8").write(to_markdown(a))
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+        with open(path, "w", encoding="utf-8") as target:
+            target.write(to_markdown(a))
         print(f"wrote {path}", file=sys.stderr)
 
 

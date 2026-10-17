@@ -8,16 +8,6 @@
       "action": "delete"
     },
     {
-      "cp": "U+200C",
-      "name": "ZERO WIDTH NON-JOINER",
-      "action": "delete"
-    },
-    {
-      "cp": "U+200D",
-      "name": "ZERO WIDTH JOINER",
-      "action": "delete"
-    },
-    {
       "cp": "U+2060",
       "name": "WORD JOINER",
       "action": "delete"
@@ -30,31 +20,6 @@
     {
       "cp": "U+00AD",
       "name": "SOFT HYPHEN",
-      "action": "delete"
-    },
-    {
-      "cp": "U+180E",
-      "name": "MONGOLIAN VOWEL SEPARATOR",
-      "action": "delete"
-    },
-    {
-      "cp": "U+061C",
-      "name": "ARABIC LETTER MARK",
-      "action": "delete"
-    },
-    {
-      "cp": "U+200E",
-      "name": "LEFT-TO-RIGHT MARK",
-      "action": "delete"
-    },
-    {
-      "cp": "U+200F",
-      "name": "RIGHT-TO-LEFT MARK",
-      "action": "delete"
-    },
-    {
-      "cp": "U+E0000-U+E007F",
-      "name": "TAG CHARACTERS (invisible ASCII smuggling)",
       "action": "delete"
     },
     {

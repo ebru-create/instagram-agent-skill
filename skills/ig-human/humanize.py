@@ -4,11 +4,8 @@ humanize.py - strip the machine fingerprint out of a draft.
 
 Three passes, in this order:
 
-  1. INVISIBLE   delete or normalise the characters a human keyboard never
-                 produces: zero-width joiners, word joiners, soft hyphens,
-                 BOMs, Unicode tag characters, non-breaking and narrow spaces.
-                 These survive copy-paste and are the most mechanical tell in
-                 any generated text.
+  1. INVISIBLE   remove known cleanup candidates and normalise spaces.
+                 Preserve joining, direction and emoji tag characters.
   2. TYPOGRAPHIC em dash -> comma, en dash -> hyphen, curly quotes -> straight,
                  ellipsis -> three dots, bullet -> hyphen.
   3. LEXICAL     replace the slop lexicon in slop.json with plain words,
@@ -31,7 +28,6 @@ import json
 import os
 import re
 import sys
-import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 LEX = os.path.join(HERE, "slop.json")
@@ -84,12 +80,7 @@ def pass_invisible(text, lex):
             hits.append({"name": entry["cp"] + " " + entry["name"], "count": n,
                          "action": entry["action"]})
             text = re.sub(pattern, "" if entry["action"] == "delete" else " ", text)
-    # Any remaining Cf (format) character is invisible by definition.
-    stray = [c for c in text if unicodedata.category(c) == "Cf"]
-    if stray:
-        hits.append({"name": "other invisible format chars", "count": len(stray),
-                     "action": "delete"})
-        text = "".join(c for c in text if unicodedata.category(c) != "Cf")
+    # Unlisted format characters may carry language or emoji semantics.
     return text, hits
 
 
@@ -203,11 +194,14 @@ def restore_capitals(original, text):
                   lambda m: m.group(0)[:-1] + m.group(1).upper(), text)
 
 
-def humanize(text, lex):
+def humanize(text, lex, preserve_typography=False):
     raw_for_case = text
     text, urls = protect_urls(text)
     text, inv = pass_invisible(text, lex)
-    text, typo = pass_typographic(text, lex)
+    if preserve_typography:
+        typo = []
+    else:
+        text, typo = pass_typographic(text, lex)
     text, lexi = pass_lexical(text, lex)
     text = restore_capitals(raw_for_case, text)
     text = restore_urls(text, urls)
@@ -228,7 +222,7 @@ def render_report(report, out=sys.stderr):
         + sum(h["count"] for h in report["lexical"])
 
     head("HUMANIZE REPORT")
-    print(f"{total} machine artefacts removed, "
+    print(f"{total} cleanup changes, "
           f"{len(report['structures'])} structural tells flagged for rewrite", file=out)
 
     if report["invisible"]:
@@ -260,11 +254,13 @@ def main():
     ap.add_argument("--report", action="store_true", help="print what changed, to stderr")
     ap.add_argument("--json", action="store_true", help="emit {text, report} as JSON")
     ap.add_argument("--lexicon", default=LEX, help="path to slop.json")
+    ap.add_argument("--preserve-typography", action="store_true",
+                    help="keep the user's punctuation and typographic characters")
     args = ap.parse_args()
 
     raw = sys.stdin.read() if args.input == "-" else open(args.input, encoding="utf-8").read()
     lex = load_lexicon(args.lexicon)
-    clean, report = humanize(raw, lex)
+    clean, report = humanize(raw, lex, args.preserve_typography)
 
     if args.json:
         print(json.dumps({"text": clean, "report": report}, indent=2, ensure_ascii=False))
