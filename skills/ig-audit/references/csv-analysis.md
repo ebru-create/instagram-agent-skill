@@ -6,6 +6,9 @@ or Meta exports. Map supplied fields to the template, preserving their definitio
 if a mapping is uncertain, leave the measure blank and describe the uncertainty.
 Never infer missing post attribution. Screenshots and prose can still be audited
 manually through the main skill.
+For unfamiliar headers, Turkish/English numeric formatting or explicit date
+conversion, use [the inspect/map/preview importer](csv-import.md) first. It exports
+only a fully validated canonical file; existing canonical input needs no conversion.
 
 From the repository root (use the equivalent installed skill path):
 
