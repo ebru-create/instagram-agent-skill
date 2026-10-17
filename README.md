@@ -66,8 +66,8 @@ python3 skills/ig-account/account.py show --account studio_one
 ```
 
 Each folder under `~/.claude/instagram/accounts/HANDLE/` holds its own `voice.md`,
-`plan.md`, `swipe.md`, `log.md` and `results.md`. Setup creates the directory
-without importing or overwriting files. Fill in its voice profile from your own
+`strategy.md`, `plan.md`, `swipe.md`, `log.md` and `results.md`. Setup creates
+the directory without importing or overwriting files. Fill in its voice profile from your own
 examples, then say which publishing account a request is for:
 
 ```
@@ -139,6 +139,36 @@ abbreviations to full integers instead of guessing their magnitude.
 Install the whole pack, including `ig-account/ig_language.py`, which the six
 text tools now share. No third-party Python packages are required.
 
+## Plans that fit the account
+
+`/ig-plan` uses a confirmed goal, the time and resources available, format
+constraints and relevant account results. There is no fixed weekly post count,
+Reel minimum, daily Story requirement or compulsory engagement routine.
+Preparation, production, publishing and any planned responses count toward the
+same budget. If there is no capacity, a pause is a valid plan.
+
+Use `templates/strategy.md` to record supplied or confirmed preferences at the
+selected account's resolved `strategy` path. The brief is optional; unknown
+fields stay unknown and provisional assumptions stay in the plan. A request can
+also provide the information directly:
+
+```
+/ig-plan for @studio_one: Türkçe atölye başvurusu hedefliyoruz. Haftada 90 dakika,
+en fazla iki paylaşım, kamera karşısına çıkmadan. Geçmiş sonuç henüz yok.
+```
+
+Without results, the skill sets a baseline and a review point rather than
+inventing a winning format or best posting time. With results, `/ig-audit`
+separates observations from explanations and compares compatible formats,
+post ages and organic/paid treatment. Zero/missing denominators stay N/A;
+missing results are not zero and total shares are not relabelled as private
+sends. Low views alone do not identify a hook problem, and reach without follows
+does not prove a profile problem. Each suggested experiment names its metric,
+observation window and the main uncertainty.
+
+This update changes skill instructions and saved-context paths. It does not
+add an automatic scheduler or a statistical causal-inference engine.
+
 ## The fourteen
 
 | command | what it does |
@@ -148,15 +178,15 @@ text tools now share. No third-party Python packages are required.
 | `/ig-viral` | Goes and finds what is working in your niche, ranks it by multiple over each account's own median, names the formula, writes the swipe file. |
 | `/ig-caption` | The caption, linted. Shows you the 125 characters the feed actually shows before the tap. |
 | `/ig-carousel` | Swipe posts. The cover that earns the swipe, slide copy, and the 1080x1350 files. |
-| `/ig-story` | The daily story sequence, which sticker does which job, and the DM funnel that starts with them moving first. |
+| `/ig-story` | A Story sequence sized to the plan, which sticker does which job, and the DM funnel that starts with them moving first. |
 | `/ig-profile` | Scores your profile against a [12-part rubric](skills/ig-profile/rubric.json) out of 100, then rewrites in fix-first order. |
-| `/ig-plan` | The week. What to post, which format, when, and the 10 accounts to engage with. |
+| `/ig-plan` | A week that fits the account’s goal, production capacity and relevant results, with optional engagement and a review point. |
 | `/ig-human` | The humanizer. Two scripts that actually run. See below. |
 | `/ig-comment` | Comments on other people's posts. Nine types, picked by what the post actually is. Never "🔥🔥🔥". |
 | `/ig-reply` | The thread under your own post. Sorts into keyword / lead / substance / question / support / noise, then writes in that order. |
 | `/ig-dm` | The keyword delivery, the first message, the collab pitch, and the two follow-ups. Two. |
 | `/ig-repurpose` | One video, podcast or newsletter into a week of reels and carousels that each stand alone. |
-| `/ig-audit` | Post-mortem on what you already posted. Ranks by outlier multiple and sends per reach, not views. |
+| `/ig-audit` | Goal-based analysis with comparable cohorts, explicit missing data and testable explanations. |
 
 ## The five tools that actually run
 
@@ -420,6 +450,7 @@ skills/ig-human/detect.py          the five-check panel
 skills/ig-viral/swipe.py           outlier ranking and formula classification
 skills/ig-profile/rubric.json      the 100-point profile score
 templates/voice.md                 your voice profile. Fill this in first.
+templates/strategy.md              confirmed goals, capacity and review criteria
 ```
 
 ## Credit

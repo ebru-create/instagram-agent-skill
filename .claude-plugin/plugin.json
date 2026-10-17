@@ -1,7 +1,7 @@
 {
   "name": "instagram-agent",
-  "description": "Fourteen Claude skills that run an Instagram account: Reels off 26 hook formulas with a scored hook and a timed beat sheet, a research skill that finds what is working in your niche and ranks it by outlier multiple, captions linted against the feed truncation, carousels, stories, profile score, weekly plan, comments, replies, DMs, repurposing, audits, and a humanizer that strips the AI fingerprint before anything ships. Separate local context for each publishing account. English and Turkish content tools.",
-  "version": "1.2.0",
+  "description": "Fourteen Claude skills for Instagram content: account-specific profiles, English and Turkish text tools, Reels, captions, carousels, stories, research, comments, replies, DMs, repurposing and profile reviews. Weekly plans fit confirmed goals and capacity; audits separate evidence from hypotheses. Drafts stay local for user review.",
+  "version": "1.3.0",
   "author": {
     "name": "Jake Schincariol",
     "url": "https://opusjake.ai"

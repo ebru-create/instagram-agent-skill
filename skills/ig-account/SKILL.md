@@ -39,6 +39,9 @@ and returns paths. Populate `voice.md` from the user's own examples or the
 repository's `templates/voice.md`. Do not invent a voice or copy another brand.
 Other context files are created only when the workflow produces their content.
 `results.md` stores account-specific audit findings for later planning.
+`strategy.md` stores supplied or confirmed goals, production capacity and review
+criteria; use `templates/strategy.md` from the repository if useful. It is
+optional and is not auto-created or populated with guessed preferences.
 Optional `slop.json` (English) and `slop.tr.json` (Turkish) lexicon overrides
 also stay in this directory; it never
 changes another account's vocabulary rules.
