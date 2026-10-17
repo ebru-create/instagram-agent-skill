@@ -9,12 +9,28 @@ description: >-
 
 # ig-plan
 
+## Account context
+
+For account-specific work, resolve the user's publishing handle from the request
+or established conversation, not a research target or message recipient. Run
+`../ig-account/account.py show --account HANDLE` with Python from this skill's
+folder (or use the helper's absolute installed path). Without an established
+handle, run `show` without `--account`: legacy paths work only when no named
+accounts exist; otherwise ask which publishing account to use.
+Use only the returned paths, read that account's voice when relevant, and pass
+the same handle to downstream skills. Missing files never fall back to another
+account. On switching accounts, discard the previous account's context. Include
+`account: @HANDLE` in receipts for saved work. Text-only edits need no selection
+unless they use saved brand context. If the helper is unavailable, work from
+supplied text without saved context or filesystem writes; install the full pack
+for persistent profiles. See [account setup](../ig-account/SKILL.md).
+
 The control room. Everything else in this pack executes; this decides what gets
 executed. Run it once a week, on the same day.
 
 ## Input
 
-If `~/.claude/instagram/voice.md`, `swipe.md` and `log.md` exist, read them.
+Read the resolved `voice`, `swipe`, `log` and `results` paths when they exist.
 The swipe file is the user's own evidence from `/ig-viral` about which formulas
 are landing in their niche right now, and it outranks anything in this file.
 The log stops the plan repeating a theme from the last fortnight.
@@ -95,6 +111,6 @@ ENGAGE  (5 reach / 3 peers / 2 buyers)
 Say "write Tuesday" and I will draft it.
 ```
 
-Write the plan to `~/.claude/instagram/plan.md` so the other skills can read
+Write the plan to the resolved `plan` path so the other skills can read
 it. Nothing is scheduled or posted anywhere. This is a plan and the user runs
 it.

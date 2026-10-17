@@ -11,6 +11,22 @@ description: >-
 
 # ig-reel
 
+## Account context
+
+For account-specific work, resolve the user's publishing handle from the request
+or established conversation, not a research target or message recipient. Run
+`../ig-account/account.py show --account HANDLE` with Python from this skill's
+folder (or use the helper's absolute installed path). Without an established
+handle, run `show` without `--account`: legacy paths work only when no named
+accounts exist; otherwise ask which publishing account to use.
+Use only the returned paths, read that account's voice when relevant, and pass
+the same handle to downstream skills. Missing files never fall back to another
+account. On switching accounts, discard the previous account's context. Include
+`account: @HANDLE` in receipts for saved work. Text-only edits need no selection
+unless they use saved brand context. If the helper is unavailable, work from
+supplied text without saved context or filesystem writes; install the full pack
+for persistent profiles. See [account setup](../ig-account/SKILL.md).
+
 Turns one raw idea into a Reel that somebody finishes.
 
 Two tools live in this folder and they both actually run. Use them. Do not
@@ -24,7 +40,7 @@ python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
 
 ## Before you write
 
-1. Read `~/.claude/instagram/voice.md` if it exists. That is the user's voice
+1. Read the resolved `voice` path if it exists. That is the user's voice
    profile: how they talk on camera, what they never say, who they are talking
    to. If it does not exist, ask for **three of their own reels**, transcribe or
    read them, infer the voice, and write the file. A script in the wrong voice
@@ -36,7 +52,7 @@ python3 beats.py script.txt --target 30     # timed beat sheet before you shoot
 3. If the idea is thin, do not pad it. Ask one batched question: what happened,
    to whom, and what did it cost or return. A Reel needs one specific true
    thing. Get it before writing.
-4. If `~/.claude/instagram/swipe.md` exists, read it. `/ig-viral` writes that
+4. If the resolved `swipe` path exists, read it. `/ig-viral` writes that
    file, and it is the user's own evidence about which formulas are working in
    their niche right now. It beats the defaults in this file.
 
@@ -93,7 +109,7 @@ Reply "yes" to log it, or tell me what to change.
 ```
 
 **7. Never publish.** This skill produces a script. The user shoots it and
-posts it. On "yes", append to `~/.claude/instagram/log.md` with the date, the
+posts it. On "yes", append to the resolved `log` path with the date, the
 hook formula used and the first line, so `/ig-audit` has a history later.
 
 ## On-screen text is a separate script

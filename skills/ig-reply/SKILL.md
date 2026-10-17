@@ -9,6 +9,22 @@ description: >-
 
 # ig-reply
 
+## Account context
+
+For account-specific work, resolve the user's publishing handle from the request
+or established conversation, not a research target or message recipient. Run
+`../ig-account/account.py show --account HANDLE` with Python from this skill's
+folder (or use the helper's absolute installed path). Without an established
+handle, run `show` without `--account`: legacy paths work only when no named
+accounts exist; otherwise ask which publishing account to use.
+Use only the returned paths, read that account's voice when relevant, and pass
+the same handle to downstream skills. Missing files never fall back to another
+account. On switching accounts, discard the previous account's context. Include
+`account: @HANDLE` in receipts for saved work. Text-only edits need no selection
+unless they use saved brand context. If the helper is unavailable, work from
+supplied text without saved context or filesystem writes; install the full pack
+for persistent profiles. See [account setup](../ig-account/SKILL.md).
+
 The comment thread under your own post is where reach is decided. Every reply
 is another interaction on the post, replies arriving in the first hour do most
 of the work, and on Instagram a reply can also be a Reel, which is the single
