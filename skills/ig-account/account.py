@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 
@@ -11,7 +12,20 @@ FILES = {name: name + ".md" for name in ("voice", "strategy", "plan", "swipe", "
 FILES["publications"] = "publications.json"
 FILES["lexicon"] = "slop.json"
 FILES["lexicon_tr"] = "slop.tr.json"
-DEFAULT_ROOT = "~/.claude/instagram"
+
+
+def default_root():
+    """One root per process; never combine accounts from different roots."""
+    configured = os.environ.get("INSTAGRAM_AGENT_HOME")
+    if configured and configured.strip():
+        return str(Path(configured).expanduser())
+    legacy = Path.home() / ".claude/instagram"
+    if legacy.exists():
+        return str(legacy)
+    return str(Path.home() / ".local/share/instagram-agent")
+
+
+DEFAULT_ROOT = default_root()
 
 
 def normalize_handle(value):

@@ -26,7 +26,7 @@ not validated performance predictions or AI-authorship detection.
 
 ## Account context
 
-For a slot from `/ig-plan`, preserve its publishing account, goal, time budget,
+For a slot from `ig-plan`, preserve its publishing account, goal, time budget,
 post/frame count and camera constraints. These take precedence over this skill's
 generic format suggestions. Read the resolved `strategy` brief if needed.
 
@@ -56,7 +56,7 @@ framework with parts, a before and after, a list worth screenshotting. Use a
 Reel when the idea has motion, a face, or a payoff that has to be seen
 happening.
 
-If the idea is one claim, it is neither. Hand it to `/ig-reel` and say so.
+If the idea is one claim, it is neither. Hand it to `ig-reel` and say so.
 
 ## Structure
 
@@ -118,10 +118,10 @@ and provide the image directory plus alt text and caption. Nothing is uploaded.
 
 The slide-by-slide copy first, as a numbered list the user can read in ten
 seconds and edit before anything is rendered. Then the **caption**, which for a
-carousel is Job B in `/ig-caption`: the caption is doing work here, because the
+carousel is Job B in `ig-caption`: the caption is doing work here, because the
 cover has already used its six words.
 
-Run both through `/ig-human` with the selected language. If the user requests
+Run both through `ig-human` with the selected language. If the user requests
 copy-only or an explicit copy-approval stage, stop at that stage. Otherwise
 render the requested draft for review; local generation is not publishing.
 

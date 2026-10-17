@@ -92,7 +92,7 @@ Pick by what the post actually is. Never default to type 1.
 ## Output
 
 Give **two options of different types**, labelled, plus one line on which you
-would post and why. Run both through `/ig-human` first: comments are short, so
+would post and why. Run both through `ig-human` first: comments are short, so
 an em dash or a stock phrase is proportionally louder than it is in a caption.
 
 ```

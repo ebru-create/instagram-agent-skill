@@ -74,7 +74,7 @@ If a question in the comments is one that thirty other people also have,
 **reply to it with a Reel**. Instagram will attach the comment to the new video
 as a sticker, the person who asked gets notified, and a question with real
 demand behind it becomes a post with the hook already written for you. Flag
-every QUESTION that qualifies and hand it to `/ig-reel` as formula #16.
+every QUESTION that qualifies and hand it to `ig-reel` as formula #16.
 
 ## How to reply
 

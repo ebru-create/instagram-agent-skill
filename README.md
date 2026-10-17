@@ -23,6 +23,9 @@ your own chosen workflow. A draft approval is separate from a reported publicati
   and a user-supplied TTF/OTF font covering the content's characters.
 
 No API key is required by these scripts. Your agent host's setup is separate.
+The core metadata is `instagram-agent.json`; Claude marketplace metadata is an
+optional host adapter. See [host-independent setup](docs/hosts.md) for Codex,
+Claude Code and generic agents using local/open-weight models.
 
 ## Install
 
@@ -31,13 +34,17 @@ From a checkout:
 ```bash
 git clone https://github.com/ebru-create/instagram-agent-skill.git
 cd instagram-agent-skill
-python3 scripts/install.py --dry-run
-python3 scripts/install.py
-python3 scripts/install.py --check
+python3 scripts/install.py --host codex --dry-run
+python3 scripts/install.py --host codex
+python3 scripts/install.py --host codex --check
 ```
 
-The default destination is `~/.claude/skills`. For a project-local installation,
-pass `--skills-dir /path/to/project/.claude/skills` consistently. Install all
+`--host codex` selects `~/.agents/skills`; `--host claude-code` selects
+`~/.claude/skills`. Omitting `--host` keeps the old Claude destination.
+`--host generic --skills-dir PATH` installs the same complete bundle for another
+agent; it does not configure or download a model. For a project-local installation,
+pass `--skills-dir /path/to/project/.agents/skills` for Codex, or the host's
+project skill directory, consistently. Install all
 fourteen folders together: executable tools share helpers and data files.
 
 The repository also includes marketplace metadata for plugin installation:
@@ -68,7 +75,10 @@ under `ig-account/assets/templates/`. Account creation does not invent profiles
 or populate results.
 
 Each named account has separate context and records under
-`~/.claude/instagram/accounts/HANDLE/`. Select it explicitly; there is no global
+the resolved root's `accounts/HANDLE/` directory. `--root`/`--data-root` (Turkish
+`--kok`) overrides `INSTAGRAM_AGENT_HOME`. Without an override, an existing
+`~/.claude/instagram` is retained, otherwise `~/.local/share/instagram-agent` is
+used. Roots are never merged or searched for a missing account. Select it explicitly; there is no global
 active-account setting or fallback to another brand. Legacy paths still resolve
 without an account only when no named accounts exist. See [account setup](skills/ig-account/SKILL.md).
 

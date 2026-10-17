@@ -1,0 +1,7 @@
+{
+  "name": "instagram-agent",
+  "version": "1.13.0",
+  "license": "MIT",
+  "skills": "skills/",
+  "data_root_env": "INSTAGRAM_AGENT_HOME"
+}

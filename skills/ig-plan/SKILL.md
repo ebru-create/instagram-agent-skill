@@ -108,7 +108,7 @@ in pursuit of a default cadence. Include an optional cut-first item when useful.
 Engagement is optional. If it supports the goal and the user wants it, allocate
 it inside the same budget and pick a manageable list relevant to that account.
 There is no mandatory 20 minutes a day, list of ten, or requirement to comment
-before posting. Draft through `/ig-comment` only when requested; nothing is sent.
+before posting. Draft through `ig-comment` only when requested; nothing is sent.
 
 ## Timing and learning
 

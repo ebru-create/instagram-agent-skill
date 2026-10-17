@@ -156,7 +156,7 @@ proxies, not account-median outliers. Compare top/bottom patterns only within
 the same baseline group. JSON summaries are inside `groups`.
 
 It computes the outlier multiple, names the hook formula using the same 26
-formulas `/ig-reel` writes from, scores each hook with `hookscore.py`, and
+formulas `ig-reel` writes from, scores each hook with `hookscore.py`, and
 prints what separates the top third from the bottom third.
 
 ## Step 4: say what it means, carefully
@@ -181,7 +181,7 @@ difference between research and horoscopes.
 ## Step 5: turn it into something to shoot
 
 For the top three formulas, write **the user's version**: their own story,
-their own number, in the shape that is working. Hand each one to `/ig-reel`
+their own number, in the shape that is working. Hand each one to `ig-reel`
 with the formula id already chosen.
 
 Never hand back "make a reel like this one". Hand back a hook line they could
@@ -211,8 +211,8 @@ YOUR VERSION
   ...
 ```
 
-Write the swipe file to the resolved `swipe` path. `/ig-reel` and
-`/ig-plan` both read it, which is the point: after this runs once, the rest of
+Write the swipe file to the resolved `swipe` path. `ig-reel` and
+`ig-plan` both read it, which is the point: after this runs once, the rest of
 the pack is working from the user's own evidence instead of from defaults.
 
 Nothing is posted, followed, liked or messaged by this skill. It reads.

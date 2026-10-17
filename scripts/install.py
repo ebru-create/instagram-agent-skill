@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import shutil
 import subprocess
@@ -68,7 +69,9 @@ def bundle(source=ROOT):
     for path in files.values():
         if path.suffix == ".py":
             compile(path.read_bytes(), str(path), "exec")
-    version = json.loads((source / ".claude-plugin/plugin.json").read_text(encoding="utf-8"))["version"]
+    version = json.loads((source / "instagram-agent.json").read_text(encoding="utf-8"))["version"]
+    if not isinstance(version, str) or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise ValueError("invalid core package version")
     return files, {"schema_version": 1, "version": version,
                    "skills": [path.name for path in skills],
                    "files": {name: digest(path) for name, path in sorted(files.items())}}
@@ -82,9 +85,14 @@ def destination(value, source=ROOT):
     skill_source = (Path(source) / "skills").resolve()
     if path == skill_source or path in skill_source.parents or skill_source in path.parents:
         raise ValueError("destination must not overlap the source skills directory")
-    data = (Path.home() / ".claude/instagram").resolve()
-    if path == data or data in path.parents:
-        raise ValueError("choose a skills directory, not the Instagram account-data directory")
+    roots = [Path.home() / ".claude/instagram", Path.home() / ".local/share/instagram-agent"]
+    configured = os.environ.get("INSTAGRAM_AGENT_HOME")
+    if configured and configured.strip():
+        roots.append(Path(configured).expanduser())
+    for data in roots:
+        data = data.resolve()
+        if path == data or data in path.parents:
+            raise ValueError("choose a skills directory, not the Instagram account-data directory")
     if path.exists() and not path.is_dir():
         raise ValueError("skills destination must be a directory")
     return path
@@ -275,9 +283,20 @@ def install(target, source=ROOT, *, update=False, replace_existing=False, dry_ru
         lock.rmdir()
 
 
+def host_destination(host, explicit=None):
+    """Hosts select discovery locations, never different runtime code."""
+    if explicit:
+        return explicit
+    if host == "generic":
+        raise ValueError("--host generic requires --skills-dir PATH")
+    return "~/.agents/skills" if host == "codex" else "~/.claude/skills"
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--skills-dir", default="~/.claude/skills", help="explicit destination for all ig-* folders")
+    parser.add_argument("--host", choices=("codex", "claude-code", "generic"), default="claude-code",
+                        help="skill discovery layout; default claude-code preserves existing installs")
+    parser.add_argument("--skills-dir", help="override destination; required for generic hosts")
     parser.add_argument("--update", action="store_true", help="update a managed installation, backing up replaced folders")
     parser.add_argument("--replace-existing", action="store_true", help="with --update, explicitly replace local edits/unmanaged folders with backup")
     mode = parser.add_mutually_exclusive_group()
@@ -289,8 +308,9 @@ def main():
     if args.check and (args.update or args.replace_existing):
         parser.error("--check cannot be combined with update flags")
     try:
-        result = install(args.skills_dir, update=args.update, replace_existing=args.replace_existing,
+        result = install(host_destination(args.host, args.skills_dir), update=args.update, replace_existing=args.replace_existing,
                          dry_run=args.dry_run, check=args.check)
+        result["host"] = args.host
     except (OSError, ValueError, SyntaxError, subprocess.TimeoutExpired) as exc:
         parser.error(str(exc))
     print(json.dumps(result, ensure_ascii=False, indent=2))

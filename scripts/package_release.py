@@ -13,9 +13,9 @@ import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-ROOT_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore'}
+ROOT_FILES = {'README.md', 'CHANGELOG.md', 'LICENSE', '.gitignore', 'instagram-agent.json'}
 DIRECTORIES = {'docs', 'scripts', 'skills', 'templates', 'evaluation', 'validation', 'tests', '.claude-plugin'}
-REQUIRED = {'README.md', 'CHANGELOG.md', 'LICENSE', '.claude-plugin/plugin.json',
+REQUIRED = {'instagram-agent.json', 'README.md', 'CHANGELOG.md', 'LICENSE', '.claude-plugin/plugin.json',
             '.claude-plugin/marketplace.json', 'scripts/install.py', 'scripts/package_release.py',
             'docs/quickstart.tr.md', 'docs/walkthrough.tr.md', 'docs/installation.md', 'docs/release.md'}
 
@@ -82,7 +82,9 @@ def inventory(source):
     if not REQUIRED <= set(files):
         raise ValueError('release source is incomplete; required documentation/metadata is missing')
     plugin = json.loads(files['.claude-plugin/plugin.json'])
-    version = plugin['version']
+    version = json.loads(files['instagram-agent.json'])['version']
+    if plugin['version'] != version:
+        raise ValueError('core and Claude adapter version do not match')
     if not isinstance(version, str) or not re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+', version):
         raise ValueError('release version must have major.minor.patch form')
     if f'## [{version}]' not in files['CHANGELOG.md'].decode('utf-8'):

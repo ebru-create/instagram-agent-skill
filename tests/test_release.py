@@ -86,7 +86,7 @@ class ReleaseTests(unittest.TestCase):
         plugin = self.source / '.claude-plugin/plugin.json'
         data = json.loads(plugin.read_text()); data['version'] = '9.9.9'; plugin.write_text(json.dumps(data))
         release.git(self.source, 'add', '.claude-plugin/plugin.json'); self.commit()
-        with self.assertRaisesRegex(ValueError, 'changelog'):
+        with self.assertRaisesRegex(ValueError, 'adapter version'):
             release.inventory(self.source)
 
     def test_modified_or_extra_archive_entries_fail_verification(self):
