@@ -197,7 +197,7 @@ From a clean committed checkout, prepare and verify a source ZIP:
 
 ```bash
 python3 scripts/package_release.py --out /path/to/new-release
-python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.14.0.zip
+python3 scripts/package_release.py --verify /path/to/new-release/instagram-agent-skill-1.15.0.zip
 ```
 
 The [release guide](docs/release.md) describes the inventory, checksums and final

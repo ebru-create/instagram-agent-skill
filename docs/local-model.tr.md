@@ -48,7 +48,7 @@ Fiyat, müşteri hikâyesi, tarih veya başarı sonucu ekleme.
 ```bash
 python3 skills/ig-account/local_model.py caption \
   --model qwen3:4b --account hesabim \
-  --brief /tam/yol/brief.txt --language tr --keywords ajanda \
+  --brief /tam/yol/brief.txt --language tr --keywords ajanda --cta save \
   --out /tam/yol/yeni-taslak
 ```
 
@@ -57,8 +57,19 @@ Hesap kökü önceki araçlarla aynıdır: `--root PATH`, ardından
 arama veya otomatik seçim yapılmaz. Kurulu kopyada aracın tam yolunu kullanın;
 örneğin `~/.agents/skills/ig-account/local_model.py`.
 
-Her çalıştırmada yeni bir çıktı klasörü seçin. Model tek sefer çağrılır; otomatik
-yeniden deneme veya başarısız denetimi gizlemek için yeniden yazım yapılmaz.
+`--cta save|comment|share|dm|follow|none` açık eylem hedefini seçer. `save` kaydetme,
+`comment` okuyucunun bu paylaşımın yorumuna kendi görüşünü yazmasıdır. `none`
+eylem çağrısı istenmediğini belirtir; seçenek hiç verilmezse model briefi izler ve
+raporda doğrulanmış bir çağrı hedefi varsayılmaz. Açık hedef, mevcut brief ile
+tutarlı olmalıdır; eski profil tercihinden önce gelir. Türkçe üretim yönlendirmesi
+yazara verilen görevi okuyucuya hazır metne dönüştürmeyi, anlamı ve sen/siz dilini
+korumayı ister; bunların hepsi otomatik olarak doğrulanamaz.
+
+Her çalıştırmada yeni bir çıktı klasörü seçin. Varsayılan kullanımda model tek
+sefer çağrılır. Açıkça `--revise-once` verirseniz ilk taslak, brief, profil ve
+denetim sinyalleriyle yalnızca bir ek düzeltme çağrısı yapılır; toplam en fazla
+iki çağrıdır. Sonuç yine kötü olsa da başka tur yapılmaz. Düzeltme metni daha iyi
+yapmayabilir, hatta bozabilir; iki metni karşılaştırın. Otomatik onay verilmez.
 Modelden yalnızca tek bir `caption` metin alanı olan JSON istenir; şema sunucuya
 gönderilir ve yanıt yerelde ayrıca doğrulanır. Bu yapısal kontrol, metnin doğru
 veya kaliteli olduğunu göstermez. Şemalı çıktı desteklemeyen modeller reddedilebilir.
@@ -77,12 +88,39 @@ yanıtlar başarısız sayılır; sınırı artırmadan önce hata ve ham yanıt
 | `response.json` | Ollama'nın yanıtı ve süre/token bilgileri |
 | `report.json` | Hesap, model digest'i, girdi/araç hash'leri, ayarlar, denetimler ve durum |
 
+Tek düzeltme turunda `draft.initial.raw.txt`, `draft.initial.txt` ve
+`response.initial.json` ilk durumu; `response.revision.json` ikinci model yanıtını
+saklar. Normal `draft.txt`/`response.json` son geçerli yanıtı gösterir; en iyi
+taslağın otomatik seçildiği anlamına gelmez. Raporun `initial` alanı ilk denetimleri,
+`model_calls` çağrı sayısını, `revision_requested` açık seçimi kaydeder. İkinci
+yanıt geçersizse ilk metin korunur ve çalışma `failed` olur.
+
 Başarılı komutun durumu `draft_created_needs_review` olur. Çıkış kodu 0 teknik
 akışın tamamlandığını söyler; metnin onaylandığını söylemez. `tools.caption` ve
 `tools.detect` içindeki gerçek sonuçları okuyun. Uyarılar/başarısız metin denetimleri
 raporda korunur. Türkçe ses puanı gibi desteklenmeyen kontroller N/A kalır.
 Yanıt soruya dönüştüyse önce eksik bilgileri tamamlayın. Her durumda doğru bilgi,
 doğal Türkçe, tek çağrı ve hesap dili açısından metni insan incelemelidir.
+
+`quality` alanı ayrıca açık hedefin algılanmamasını (`requested_cta_missing`),
+çağrı istenmezken algılanmasını (`unexpected_cta`), birden fazla eylem türünü
+(`multiple_actions`) ve bazı yönerge kopyalarını (`instruction_like_text`)
+gösterir. Açıklama denetimindeki uyarı/hatalar da `caption_lint_review` olarak
+görünür. Bu sinyaller tek başına metni değiştirmez veya yeni model çağrısı yapmaz.
+`no_supported_issues` yalnızca bu dar kontrollerin sinyal üretmediğini söyler;
+anlamın, dilin veya bütün brief şartlarının doğruluğunu kanıtlamaz. Örneğin model
+bir olumlu öneriyi olumsuza çevirebilir ve bu kontroller yine sessiz kalabilir.
+
+Türkçe açıklama denetimi `Yorumda seçiminizi belirtin`, `Yorumlarda paylaşınız`
+gibi yaygın emir biçimlerini tanır. Yakındaki soru + yorum istemi bir eylem türü
+sayılır; `Yorumda belirtin ve paylaşın` iki tür sayılır. Alıntı, kod, etiket ve
+bazı olumsuz/aktarılmış ifadeler ayıklanır. Bu bir Türkçe dilbilgisi çözümleyicisi
+değildir: eş anlamlı, dolaylı, ironik veya karmaşık olumsuz cümleler insan incelemesi
+gerektirir. `asks` bir eylem türü listesidir; tekrar edilen aynı eylemlerin sayısı değildir.
+
+Model bağlamına becerilerin yalnızca ilgili yazım bölümleri verilir; hesap çözme,
+dosya ve Python adımlarını model yerine kurucu akış yürütür. Tam beceri dosyalarının
+hash'leri yine raporlanır; eksik yazım bölümü ön kontrolde hata verir.
 
 Üretim veya denetim hatasında `failed` raporu saklanır; ön kontrolde reddedilen
 hesap/girdi için çıktı klasörü oluşturulmaz. Başarılı ya da başarısız çalışma
@@ -104,6 +142,9 @@ hesabın reddedilmesi kontrol edilir. `commands.json` ve `report.json` kanıtı
 saklar. `passed_with_manual_review` dar teknik senaryonun sonucudur; genel model
 kalitesi, bütün Türkçe görevler veya otonom araç kullanımı için başarı iddiası değildir.
 
+Tek düzeltme turunu da sınamak için doğrulama komutuna `--revise-once` ekleyin;
+bu durumda iki hesap için toplam en fazla dört gerçek model çağrısı yapılır.
+
 Normal testler Ollama gerektirmez; sahte yanıtlarla bağlantı sözleşmesini ve hata
 yollarını sınar. Canlı doğrulama isteğe bağlıdır ve CI'da model indirmez.
 
@@ -115,6 +156,12 @@ denetleyicinin sınırlı eşleştirmesiyle tanınmadı. Bunlar insan incelemesi
 gerektiğini gösterir; model veya denetleyici için genel başarı oranı değildir.
 Önceki serbest metin denemelerinde Aya ve Qwen çıktı sınırına ulaştı; bu
 başarısızlıklar da kayıtta belirtilmiştir.
+
+1.15.0 karşılaştırması ve ara denemeler, ayrı
+[kalite inceleme kaydında](../validation/local-model-quality.tr.json) tutulur.
+Önceki kayıt değiştirilmez. Aynı iki kurgusal hesap/brief kullanılsa da yeni
+yönlendirme ve açık çağrı hedefi birlikte değiştiği için bu izole bir A/B deneyi
+veya bağımsız model kalite ölçümü değildir.
 
 Kaynaklar: [Ollama Chat API](https://docs.ollama.com/api/chat),
 [yerel model listesi](https://docs.ollama.com/api/tags),

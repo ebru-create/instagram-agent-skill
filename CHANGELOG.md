@@ -3,6 +3,14 @@
 Versions below describe development milestones in this fork. An entry is not
 proof that a corresponding GitHub Release or tag has been published.
 
+## [1.15.0] — Turkish draft and CTA review
+
+- Recognize common Turkish comment imperatives and locations, distinguish quoted/negated action examples and avoid counting a comment question or comment-sharing phrase twice.
+- Strengthen local caption prompts toward reader-facing copy, with an optional explicit `--cta` target.
+- Supply only relevant writing guidance and record limited review signals for missing requested actions, multiple action categories, caption warnings and possible copied writer instructions.
+- Add explicit opt-in `--revise-once` with a two-call ceiling, retained initial drafts/checks and failed-revision evidence; never auto-approve either draft.
+- Recheck the original fictional local-model scenarios and retain the 1.14.0 evidence for comparison.
+
 ## [1.14.0] — bounded local model workflow
 
 - Add a standard-library Ollama adapter for explicitly selected, already installed local models.

@@ -57,19 +57,48 @@ ASKS = [
 ]
 
 TR_ASKS = [
-    (re.compile(r"\byorum(?:a|lara)?\b[^.!?\n]{0,50}\b(?:yaz|yazın|bırak|bırakın|yap|yapın)\b"), "yorum yaz"),
+    (re.compile(r"\byorum(?:a|da|larda|lara)?\b[^.!?\n]{0,70}?\b(?:yaz|yazın|yazınız|bırak|bırakın|bırakınız|yap|yapın|yapınız|belirt|belirtin|belirtiniz|paylaş|paylaşın|paylaşınız|seç|seçin|seçiniz|söyle|söyleyin|söyleyiniz)\b"), "yorum yaz"),
     (re.compile(r"\b(?:dm|mesaj)\b[^.!?\n]{0,25}\b(?:yaz|yazın|at|atın|gönder|gönderin)\b"), "mesaj gönder"),
-    (re.compile(r"\b(?:kaydet|kaydedin)\b"), "kaydet"),
-    (re.compile(r"\b(?:paylaş|paylaşın)\b"), "paylaş"),
+    (re.compile(r"\b(?:kaydet|kaydedin|kaydediniz)\b"), "kaydet"),
+    (re.compile(r"\b(?:paylaş|paylaşın|paylaşınız)\b"), "paylaş"),
     (re.compile(r"\btakip\s+(?:et|edin)\b"), "takip et"),
     (re.compile(r"\b(?:biyografideki|profildeki)\s+(?:link|bağlantı)\w*"), "profil bağlantısı"),
     (re.compile(r"\b(?:kaydır|kaydırın|dokun|dokunun)\b"), "kaydır veya dokun"),
-    (re.compile(r"\b(?:sence|sizce|hangisini|ne düşünüyorsun|ne düşünüyorsunuz)\b"), "soruyu yanıtla"),
+    (re.compile(r"\b(?:sence|sizce|hangisi|hangisini|ne düşünüyorsun|ne düşünüyorsunuz)\b"), "soruyu yanıtla"),
 ]
 
 FILLER_TAGS = {"#viral", "#fyp", "#explore", "#explorepage", "#foryou", "#foryoupage",
                "#trending", "#instagood", "#love", "#follow", "#like4like", "#reels",
                "#reelsinstagram", "#viralreels", "#instadaily"}
+
+
+def find_asks(text, language):
+    text = lower(text, language)
+    if language == 'en':
+        return [name for pattern, name in ASKS if pattern.search(text)]
+    # Quotes/code/tags describe or name actions; they are not reader requests.
+    text = re.sub(r'''```[\s\S]*?```|`[^`\n]*`|"[^"\n]*"|“[^”\n]*”|«[^»\n]*»|‘[^’\n]*’|(?<!\w)'[^'\n]*'(?!\w)|(?<!\w)#\w+''',
+                  lambda match: ' ' * len(match.group()), text)
+    matches = []
+    for pattern, name in TR_ASKS:
+        for match in pattern.finditer(text):
+            if re.match(r'\s+(?:demiyorum|demiyoruz|istemiyorum|istemiyoruz|değil)\b', text[match.end():]):
+                continue
+            matches.append((match.start(), match.end(), name))
+    comments = [match for match in matches if match[2] == 'yorum yaz']
+    result = []
+    for start, end, name in matches:
+        # A nearby question + explicit comment instruction is the same ask.
+        if name == 'soruyu yanıtla' and any(
+                abs(start - comment[0]) <= 160 and '\n\n' not in text[min(start, comment[0]):max(end, comment[1])]
+                for comment in comments):
+            continue
+        # "Yorumda paylaşın" is a comment request, not a second share request.
+        if name == 'paylaş' and any(a <= start and end <= b for a, b, _ in comments):
+            continue
+        if name not in result:
+            result.append(name)
+    return result
 
 
 def visible_window(text, cut):
@@ -103,8 +132,7 @@ def analyse(text, cut=TRUNCATE, keywords=None, language="en"):
     emoji = EMOJI_RE.findall(stripped)
     window = visible_window(stripped, cut)
     truncated = chars > cut
-    ask_patterns = ASKS if language == "en" else TR_ASKS
-    asks = [name for pattern, name in ask_patterns if pattern.search(lower(stripped, language))]
+    asks = find_asks(stripped, language)
     filler = [t for t in tags if t.lower() in FILLER_TAGS]
     keywords = [k.strip() for k in (keywords or []) if k.strip()]
 
