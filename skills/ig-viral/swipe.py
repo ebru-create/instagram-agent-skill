@@ -21,6 +21,7 @@ If you only have `followers`, leave median out and the script says so.
 
 Usage
   python3 swipe.py captured.tsv
+  python3 swipe.py captured.tsv --account studio_one
   python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
   python3 swipe.py captured.tsv --json
 """
@@ -175,6 +176,8 @@ def summarise(ranked, baseline):
 
 def render(a, out=sys.stdout):
     if "groups" in a:
+        if a.get("owner_account"):
+            print(f"Publishing account: @{a['owner_account']}", file=out)
         for group in a["groups"]:
             render(group, out)
         return
@@ -214,6 +217,8 @@ def render(a, out=sys.stdout):
 def to_markdown(a):
     lines = ["# Swipe file", "", f"{a['n']} reels across {a['accounts']} accounts.",
              "Ranked separately within each baseline type; groups are not comparable.", ""]
+    if a.get("owner_account"):
+        lines[2:2] = [f"Publishing account: @{a['owner_account']}", ""]
     for group in a["groups"]:
         lines += [f"## Baseline: {group['baseline']}", ""]
         if group["baseline"] == "follower count":
@@ -231,9 +236,30 @@ def main():
     ap = argparse.ArgumentParser(description="Rank collected reels by outlier multiple.")
     ap.add_argument("input", nargs="?", default="-", help="TSV file, or - for stdin")
     ap.add_argument("--hooks", default=HOOKS, help="path to ig-reel/hooks.json")
-    ap.add_argument("--out", help="also write the swipe file as markdown here")
+    destination = ap.add_mutually_exclusive_group()
+    destination.add_argument("--out", help="also write the swipe file as markdown here")
+    destination.add_argument("--account", help="save swipe.md for this publishing account")
+    ap.add_argument("--data-root", help="alternative account data root (requires --account)")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
+
+    if args.data_root and not args.account:
+        ap.error("--data-root requires --account")
+    account_context = None
+    if args.account:
+        sys.path.insert(0, os.path.join(HERE, "..", "ig-account"))
+        try:
+            from account import resolve
+        except ImportError:
+            ap.error("named accounts require the sibling ig-account skill; install the full pack")
+        try:
+            options = {"account": args.account}
+            if args.data_root:
+                options["root"] = args.data_root
+            account_context = resolve(**options)
+        except (ValueError, OSError) as exc:
+            ap.error(str(exc))
+        args.out = account_context["paths"]["swipe"]
 
     try:
         rows = read_rows(args.input)
@@ -245,6 +271,8 @@ def main():
         sys.exit(2)
     formulas = load_formulas(args.hooks)
     a = analyse(rows, formulas)
+    if account_context:
+        a["owner_account"] = account_context["account"]
     if not formulas:
         print("note: hooks.json not found, formulas not named. Pass --hooks.", file=sys.stderr)
     if score_hook is None:

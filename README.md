@@ -1,6 +1,6 @@
 # The Instagram agent skill
 
-Thirteen Claude skills that run an Instagram account. Free, MIT, no signup, no
+Fourteen Claude skills that run an Instagram account. Free, MIT, no signup, no
 API key, nothing to connect.
 
 One of them writes your Reels off 26 hook formulas and scores the hook before
@@ -46,15 +46,64 @@ of a chat and it runs as a mode. You lose the five Python tools, which is most
 of the point of `/ig-reel` and `/ig-human`, but the rest works.
 
 Then spend ten minutes on `templates/voice.md`. Copy it to
-`~/.claude/instagram/voice.md` and fill it in, or send Claude three of your own
-reels and say "write my voice.md from these". Every skill reads that file. It
+the `voice` path returned by `skills/ig-account/account.py show` and fill it
+in, or send Claude three of your own
+reels and say "write my voice.md from these". Each skill uses the selected
+account’s file. It
 matters more here than on other platforms, because you have to say the words
 out loud.
 
-## The thirteen
+## Separate publishing accounts
+
+For multiple brands, create a separate local folder for each handle. From the
+repository root (or the corresponding installed skill paths):
+
+```bash
+python3 skills/ig-account/account.py init studio_one
+python3 skills/ig-account/account.py init studio_two
+python3 skills/ig-account/account.py list
+python3 skills/ig-account/account.py show --account studio_one
+```
+
+Each folder under `~/.claude/instagram/accounts/HANDLE/` holds its own `voice.md`,
+`plan.md`, `swipe.md`, `log.md` and `results.md`. Setup creates the directory
+without importing or overwriting files. Fill in its voice profile from your own
+examples, then say which publishing account a request is for:
+
+```
+/ig-plan for @studio_one: plan next week's posts
+/ig-caption for @studio_two: caption this workshop photo
+```
+
+The selection stays in the conversation and is passed between skills. There is
+no global active account that another chat can switch. A missing file never
+loads another brand's data. When the publishing account is unclear, the agent
+asks; accounts being researched or messaged do not change this selection.
+This separates workflows on one computer; it is not a security boundary
+between different users with filesystem access.
+
+Existing single-account files at `~/.claude/instagram/` still work with `show`
+when no named accounts exist. Once a named account exists, select it explicitly.
+Old files are preserved. To migrate, identify their owner, then copy only that
+account's files into its new folder without overwriting existing files. Mixed
+history needs review before copying. Setup never migrates automatically.
+
+Save research to the selected publishing account with:
+
+```bash
+python3 skills/ig-viral/swipe.py captured.tsv --account studio_one
+```
+
+`--account` and `--out` cannot be combined. For an alternative data root, use
+`account.py --root /your/data init studio_one` and the matching
+`swipe.py --data-root /your/data --account studio_one`. Named accounts require
+the bundled `ig-account` folder; install all `ig-*` folders together.
+
+## The fourteen
 
 | command | what it does |
 | --- | --- |
+| `/ig-account` | Separate local profiles for each publishing account, with explicit account selection. |
 | `/ig-reel` | One idea into a Reel. Three hooks from [26 formulas](skills/ig-reel/hooks.json), scored, then the script, the on-screen text and a timed beat sheet. |
 | `/ig-viral` | Goes and finds what is working in your niche, ranks it by multiple over each account's own median, names the formula, writes the swipe file. |
 | `/ig-caption` | The caption, linted. Shows you the 125 characters the feed actually shows before the tap. |
@@ -202,6 +251,9 @@ After `humanize.py`, with the flagged structures still unrewritten:
 python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
 ```
 
+That explicit path is for legacy single-account use. With named accounts, use
+`--account HANDLE` instead so the result goes to that account's `swipe.md`.
+
 Raw views are not evidence. A 2,000,000-follower account doing 400,000 views
 had a quiet Tuesday. A 4,000-follower account doing 400,000 views found
 something. `swipe.py` ranks on the multiple over each account's own median,
@@ -321,6 +373,7 @@ skills/ig-reel/hooks.json          26 hook formulas: template, example, on-scree
 skills/ig-reel/hookscore.py        the five-property hook panel
 skills/ig-reel/beats.py            script to timed beat sheet
 skills/ig-caption/caption.py       the truncation preview and the caption linter
+skills/ig-account/account.py      account setup and explicit context paths
 skills/ig-human/slop.json          the lexicon: 154 terms, 11 cleanup classes, 16 tells
 skills/ig-human/humanize.py        the three cleaning passes
 skills/ig-human/detect.py          the five-check panel

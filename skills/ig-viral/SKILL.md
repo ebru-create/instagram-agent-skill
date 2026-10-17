@@ -12,13 +12,29 @@ description: >-
 
 # ig-viral
 
+## Account context
+
+For account-specific work, resolve the user's publishing handle from the request
+or established conversation, not a research target or message recipient. Run
+`../ig-account/account.py show --account HANDLE` with Python from this skill's
+folder (or use the helper's absolute installed path). Without an established
+handle, run `show` without `--account`: legacy paths work only when no named
+accounts exist; otherwise ask which publishing account to use.
+Use only the returned paths, read that account's voice when relevant, and pass
+the same handle to downstream skills. Missing files never fall back to another
+account. On switching accounts, discard the previous account's context. Include
+`account: @HANDLE` in receipts for saved work. Text-only edits need no selection
+unless they use saved brand context. If the helper is unavailable, work from
+supplied text without saved context or filesystem writes; install the full pack
+for persistent profiles. See [account setup](../ig-account/SKILL.md).
+
 The research skill. Everything else in this pack writes; this one goes and
 looks. Run it monthly, not daily. Formulas last a season.
 
 One tool lives in this folder and it runs:
 
 ```bash
-python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
+python3 swipe.py captured.tsv --account HANDLE
 ```
 
 ## The one idea that makes this worth doing
@@ -112,7 +128,7 @@ account	followers	median	views	hook
 ```
 
 ```bash
-python3 swipe.py captured.tsv --out ~/.claude/instagram/swipe.md
+python3 swipe.py captured.tsv --account HANDLE
 ```
 
 Counts accept plain integers, comma thousands (`1,200`) and decimal K/M/B
@@ -180,7 +196,7 @@ YOUR VERSION
   ...
 ```
 
-Write the swipe file to `~/.claude/instagram/swipe.md`. `/ig-reel` and
+Write the swipe file to the resolved `swipe` path. `/ig-reel` and
 `/ig-plan` both read it, which is the point: after this runs once, the rest of
 the pack is working from the user's own evidence instead of from defaults.
 

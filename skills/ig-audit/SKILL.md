@@ -10,6 +10,22 @@ description: >-
 
 # ig-audit
 
+## Account context
+
+For account-specific work, resolve the user's publishing handle from the request
+or established conversation, not a research target or message recipient. Run
+`../ig-account/account.py show --account HANDLE` with Python from this skill's
+folder (or use the helper's absolute installed path). Without an established
+handle, run `show` without `--account`: legacy paths work only when no named
+accounts exist; otherwise ask which publishing account to use.
+Use only the returned paths, read that account's voice when relevant, and pass
+the same handle to downstream skills. Missing files never fall back to another
+account. On switching accounts, discard the previous account's context. Include
+`account: @HANDLE` in receipts for saved work. Text-only edits need no selection
+unless they use saved brand context. If the helper is unavailable, work from
+supplied text without saved context or filesystem writes; install the full pack
+for persistent profiles. See [account setup](../ig-account/SKILL.md).
+
 The only honest source of what works for an account is that account. Every
 rule in every Instagram guide, including the ones in this pack, is a prior.
 The user's own last 30 posts are the evidence.
@@ -24,7 +40,7 @@ Ask for whichever the user has:
   screenshot is worth more than the rest combined.
 - Or just the posts and their view counts, which is enough for a first pass.
 
-Also read `~/.claude/instagram/log.md` if it exists, since it records which
+Also read the resolved `log` path if it exists, since it records which
 hook formula each post used.
 
 ## What to actually measure
@@ -102,3 +118,7 @@ DO MORE: the ones with a cost you paid and a number attached.
 Then hand the conclusions to `/ig-plan` so next week is built on the user's own
 evidence rather than on defaults, and to `/ig-viral` so the swipe file gets
 filtered to the formulas that work for this account specifically.
+
+Save the completed audit to the resolved `results` path with the publishing
+account and date. Pass that same account to `/ig-plan`; never combine results
+from different publishing accounts unless the user requests a comparison.

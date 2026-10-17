@@ -1,8 +1,9 @@
 # voice.md
 
-Copy this to `~/.claude/instagram/voice.md` and fill it in. Every skill in the
-pack reads it. Ten minutes here is the difference between scripts you shoot and
-scripts you rewrite.
+Copy this to the `voice` path returned by `ig-account/account.py show`
+(or `show --account HANDLE`) and fill it in. Each account has its own file.
+Ten minutes here is the difference between scripts you shoot and scripts you
+rewrite.
 
 If you would rather not fill it in by hand, send Claude three of your own reels
 or captions and say "write my voice.md from these". That works better than
