@@ -10,7 +10,7 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def run(model, out, base_url='http://127.0.0.1:11434', timeout=180):
+def run(model, out, base_url='http://127.0.0.1:11434', timeout=180, revise_once=False):
     out = Path(out).expanduser().absolute()
     out.mkdir(parents=True, exist_ok=False)
     steps = []
@@ -26,6 +26,7 @@ def run(model, out, base_url='http://127.0.0.1:11434', timeout=180):
         return json.loads(result.stdout) if result.stdout.strip() else {}
 
     report = {'kind': 'synthetic-live-local-model-check', 'status': 'running',
+              'revision_requested': revise_once,
               'manual_review_required': True, 'checks': [], 'outputs': [],
               'limitations': ['Two fictional caption scenarios, not a quality benchmark.',
                               'No model-generated tool calls or autonomous file access are tested.',
@@ -63,7 +64,9 @@ def run(model, out, base_url='http://127.0.0.1:11434', timeout=180):
             receipt = call(helper, '--base-url', base_url, '--timeout', timeout, 'caption',
                             '--model', model, '--brief', path, '--account', handle,
                             '--root', data, '--language', 'tr', '--keywords', keyword,
-                            '--max-tokens', 500, '--out', out / handle)
+                            '--cta', 'save' if handle == 'ornek_atolye' else 'comment',
+                            '--max-tokens', 500, '--out', out / handle,
+                            *(['--revise-once'] if revise_once else []))
             text = (out / handle / 'draft.txt').read_text(encoding='utf-8')
             foreign = next(item[1] for item in cases if item[0] != handle)
             if not text.strip() or foreign.casefold() in text.casefold():
@@ -75,15 +78,18 @@ def run(model, out, base_url='http://127.0.0.1:11434', timeout=180):
                 raise ValueError('model changed during validation')
             report['outputs'].append({'account': handle, 'draft_sha256': hashlib.sha256(text.encode()).hexdigest(),
                                        'caption_verdict': receipt['tools']['caption']['report']['verdict'],
-                                       'detect_verdict': receipt['tools']['detect']['report']['verdict']})
+                                       'detect_verdict': receipt['tools']['detect']['report']['verdict'],
+                                       'model_calls': receipt['model_calls'],
+                                       'quality': receipt['quality']})
         call(helper, '--base-url', base_url, 'caption', '--model', model,
                       '--brief', path, '--account', 'missing_account', '--root', data,
                       '--out', out / 'must-not-exist', codes=(2,))
         if (out / 'must-not-exist').exists() or 'unknown account' not in steps[-1]['stderr']:
             raise ValueError('unknown account wrote output')
         report['checks'] = ['fresh generic installation + 13 smoke checks',
-                            'two real local model requests with distinct profile hashes',
+                            'two fictional account generations with distinct profile hashes; at most two model calls each',
                             'both outputs cleaned and linted in Turkish',
+                            'explicit requested CTAs and instruction-copy signals recorded',
                             'no other-account marker in either output',
                             'unknown account rejected before output creation']
         report['status'] = 'passed_with_manual_review'
@@ -102,8 +108,9 @@ if __name__ == '__main__':
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--base-url', default='http://127.0.0.1:11434')
     parser.add_argument('--timeout', type=int, default=180)
+    parser.add_argument('--revise-once', action='store_true')
     args = parser.parse_args()
     try:
-        print(json.dumps(run(args.model, args.out, args.base_url, args.timeout), ensure_ascii=False, indent=2))
+        print(json.dumps(run(args.model, args.out, args.base_url, args.timeout, args.revise_once), ensure_ascii=False, indent=2))
     except (ValueError, OSError, subprocess.TimeoutExpired) as error:
         parser.exit(2, str(error) + '\n')

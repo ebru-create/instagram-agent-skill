@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "kind": "synthetic-local-caption-quality-review",
+  "date": "2026-10-17",
+  "technical_status": "passed_with_manual_review",
+  "editorial_status": "manual_changes_still_required",
+  "baseline": "local-model-result.tr.json",
+  "model": {
+    "name": "qwen3:4b",
+    "digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "details": {
+      "parent_model": "",
+      "format": "gguf",
+      "family": "qwen3",
+      "families": [
+        "qwen3"
+      ],
+      "parameter_size": "4.0B",
+      "quantization_level": "Q4_K_M",
+      "context_length": 262144,
+      "embedding_length": 2560
+    },
+    "capabilities": [
+      "completion",
+      "tools",
+      "thinking"
+    ],
+    "license_sha256": "d18a5cc71b84bc4af394a31116bd3932b42241de70c77d2b76d69a314ec8aa12",
+    "server_version": "0.35.1",
+    "base_url": "http://127.0.0.1:11434"
+  },
+  "limitations": [
+    "Two fictional scenarios informed prompt changes; this is not an independent benchmark or isolated A/B experiment.",
+    "Prompt context, explicit CTA and optional revision changed together. The original brief/profile hashes were retained.",
+    "No supported issues does not validate meaning or address style. A model reversed advice in one trial without a quality signal.",
+    "Qwen4B continued copying writer instructions; one explicit revision did not reliably improve either model."
+  ],
+  "frozen_baseline_relints": [
+    {
+      "account": "ornek_atolye",
+      "unchanged_draft_sha256": "66a85d15047d8d949d2b4b7ff76bcda8799617e07af4c082ef3f72c9873d7101",
+      "old_caption_verdict": "REVIEW",
+      "new_caption_verdict": "REVIEW",
+      "new_actions": [],
+      "one_ask_check": {
+        "check": "ONE ASK",
+        "status": "WARN",
+        "detail": "no call to action. Decide what this post is for"
+      }
+    },
+    {
+      "account": "ornek_seramik",
+      "unchanged_draft_sha256": "7bc9faf95ca448fb1d0af9c31bf2dea014db7afe95502a6129186f20ad7a884a",
+      "old_caption_verdict": "REVIEW",
+      "new_caption_verdict": "READY",
+      "new_actions": [
+        "yorum yaz"
+      ],
+      "one_ask_check": {
+        "check": "ONE ASK",
+        "status": "PASS",
+        "detail": "one call to action: yorum yaz"
+      }
+    }
+  ],
+  "final_outputs": [
+    {
+      "account": "ornek_atolye",
+      "model_calls": 2,
+      "initial_caption": "Bir sonraki gün için tek öncelik yazmayı öner. Fotoğrafta boş ajanda ve kalem var. Ajanda arama sözcüğü. Kaydet.\n",
+      "final_caption": "Bir sonraki gün için tek öncelik yazmayı öner. Fotoğrafta boş ajanda ve kalem var. Ajanda arama sözcüğü. Kaydet.\n",
+      "draft_sha256": "871dd4c052308f4e23302054dccd6fff6bece953660229b76c258d79ecd0e88d",
+      "unchanged_by_revision": true,
+      "quality": {
+        "expected_cta": "save",
+        "detected_actions": [
+          "kaydet"
+        ],
+        "signals": [
+          {
+            "code": "instruction_like_text",
+            "detail": "Possible instruction copied into audience-facing text; inspect manually."
+          }
+        ],
+        "status": "review",
+        "manual_review_required": true
+      },
+      "caption_verdict": "READY",
+      "input_sha256": {
+        "ornek_atolye.brief.txt": "19375ff8646233cf18cd9ef2425e34c0f53012b1678506a3e42f1e5ba56a5d85",
+        "installed/ig-caption/SKILL.md": "66aaf056716bc896eb10c0e62bca35b28af6c9fc9b158644bb86505580bc0443",
+        "installed/ig-human/SKILL.md": "8099ce0558f319813231f607e36d68c215918a715bf44a8602245cd0ff3a9793",
+        "accounts-data/accounts/ornek_atolye/voice.md": "041e15d4ce1dc40d7f335989f55196b216ac897fa612812b2496a6f1ea932067",
+        "accounts-data/accounts/ornek_atolye/strategy.md": "9894d074be6afae033a8063d5ed8b7f36187bf7a0e55d2c749f47f9ffd21600f"
+      },
+      "runner_sha256": "7d40b875da64b93b380a53478db5dd275b3ea0569800f0fc95728a5ccc4ff382",
+      "request_sha256": "ea18fc1a635d6c9225da811dc69c9686f1a94eda4af486e22e63e08a0a07ffaf",
+      "revision_request_sha256": "292950149d804bb2d290bfa8ce415fae182d927cdf1e4921e22a7a5bd4590f64",
+      "generation_options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_ctx": 8192,
+        "num_predict": 500
+      },
+      "tool_scripts_sha256": {
+        "humanize": "f7879668fb2d28337ca39815649f2a24617d7eaa9b539daeb3e269a384309fbc",
+        "detect": "9cd176d878e734287372d956dc9f2262f3bad5d7c795ebcda0597be35b96f69c",
+        "caption": "0b7d6f7dea124a3425d4a27e34611285edbdfe54ed0e6b261df4197af28bb508"
+      },
+      "manual_review": "CTA save is now present, but writer instruction and search-term metadata remain in the text. Do not publish as-is."
+    },
+    {
+      "account": "ornek_seramik",
+      "model_calls": 2,
+      "initial_caption": "İki seramik fincan taslağı var. Birisi düz, diğeri çizgili. Hangi deseni tercih edersin? Yorumda seç.\n",
+      "final_caption": "İki seramik fincan taslağı var. Birisi düz, diğeri çizgili. Hangi deseni tercih edersin? Yorumda seç.\n",
+      "draft_sha256": "5fc6556b5b3422e29b8f4af741a9bc655d85be83fb73f970b4c07c1711f8dc86",
+      "unchanged_by_revision": true,
+      "quality": {
+        "expected_cta": "comment",
+        "detected_actions": [
+          "yorum yaz"
+        ],
+        "signals": [],
+        "status": "no_supported_issues",
+        "manual_review_required": true
+      },
+      "caption_verdict": "READY",
+      "input_sha256": {
+        "ornek_seramik.brief.txt": "dcbf2bdd9c49029cc9b79e933547d3bb7f37489d98ad6ecc3e56b3e8e2f0e34c",
+        "installed/ig-caption/SKILL.md": "66aaf056716bc896eb10c0e62bca35b28af6c9fc9b158644bb86505580bc0443",
+        "installed/ig-human/SKILL.md": "8099ce0558f319813231f607e36d68c215918a715bf44a8602245cd0ff3a9793",
+        "accounts-data/accounts/ornek_seramik/voice.md": "9da973cac8b853b56a7756828647c59189542102c8d660e56266975376e6f3bb",
+        "accounts-data/accounts/ornek_seramik/strategy.md": "b0eac1e977833ec529947c074dcaa107953470bd5b5ea5c5873d03bc1e604a5e"
+      },
+      "runner_sha256": "7d40b875da64b93b380a53478db5dd275b3ea0569800f0fc95728a5ccc4ff382",
+      "request_sha256": "d852aafcc5d622a4628d78ce0db5393c629a7e16720ddc9a23c5204593475a98",
+      "revision_request_sha256": "05576b0bcb561a2a44958a62cf9223bec5555d67ca203114a82caf7cf2773994",
+      "generation_options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_ctx": 8192,
+        "num_predict": 500
+      },
+      "tool_scripts_sha256": {
+        "humanize": "f7879668fb2d28337ca39815649f2a24617d7eaa9b539daeb3e269a384309fbc",
+        "detect": "9cd176d878e734287372d956dc9f2262f3bad5d7c795ebcda0597be35b96f69c",
+        "caption": "0b7d6f7dea124a3425d4a27e34611285edbdfe54ed0e6b261df4197af28bb508"
+      },
+      "manual_review": "The comment request is recognized, but the draft uses sen address despite the siz profile. Revise manually; no_supported_issues does not cover all style issues."
+    }
+  ],
+  "trials": [
+    {
+      "stage": "explicit-cta",
+      "finding": "Writer instruction copied; second caption addresses the wrong action.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "3f1d6d9a1a76ba19f50deb4439a9e771482a659f3e96750b9e4e1f1937428663",
+          "caption": "Bir sonraki gün için tek öncelik yazmayı öner. Boş ajanda ve kalemle başla. Kaydet.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [
+              "kaydet"
+            ],
+            "signals": [
+              {
+                "code": "instruction_like_text",
+                "detail": "Possible instruction copied into audience-facing text; inspect manually."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "3f1d6d9a1a76ba19f50deb4439a9e771482a659f3e96750b9e4e1f1937428663",
+          "caption": "Hangi deseni tercih edersin? Düz veya çizgili seramik fincan taslağı arasında seçim yap. Takipçiye yorumla.\n",
+          "caption_verdict": "REVIEW",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    },
+    {
+      "stage": "native-instructions",
+      "finding": "A positive writing suggestion became a negative command; supported checks did not detect this semantic error.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "d61dc1aa7a625eb0976d911d37270842059ee83b906a90e1025f2a82786a6b9c",
+          "caption": "Bir sonraki gün için tek öncelik yazma. Ajanda boşken kalemle başla. Kaydet.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [
+              "kaydet"
+            ],
+            "signals": [],
+            "status": "no_supported_issues",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "d61dc1aa7a625eb0976d911d37270842059ee83b906a90e1025f2a82786a6b9c",
+          "caption": "Sizce hangi seramik deseni daha güzel? Düz veya çizgili fincan taslağı arasında tercih edeceğinizi yorumda belirtin.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [
+              "yorum yaz"
+            ],
+            "signals": [],
+            "status": "no_supported_issues",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    },
+    {
+      "stage": "positive-grammar-example",
+      "finding": "Writer instruction and missing requested CTA remained.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "f3f80601828543ffd20985210a0aa22853317b9be05b21bdbffc7f8fb8d3e002",
+          "caption": "Bir sonraki gün için tek öncelik yazmayı öner. Ajanda boşken kalemle başla.\n",
+          "caption_verdict": "REVIEW",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              },
+              {
+                "code": "instruction_like_text",
+                "detail": "Possible instruction copied into audience-facing text; inspect manually."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "f3f80601828543ffd20985210a0aa22853317b9be05b21bdbffc7f8fb8d3e002",
+          "caption": "Sizce hangi seramik deseni daha güzel? Düz veya çizgili fincan taslağı arasında tercih edersiniz.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [
+              "soruyu yanıtla"
+            ],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    },
+    {
+      "stage": "writing-sections-only",
+      "finding": "Shorter context still copied instruction/search metadata and switched siz to sen.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "b66a8a7d3f1a86fc8aedd90fc4ef4fefee69e019d6f8d0e4e7d227ea078b305a",
+          "caption": "Bir sonraki gün için tek öncelik yazmayı öner. Fotoğrafta boş ajanda ve kalem var. Ajanda arama sözcüğü. Kaydet.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [
+              "kaydet"
+            ],
+            "signals": [
+              {
+                "code": "instruction_like_text",
+                "detail": "Possible instruction copied into audience-facing text; inspect manually."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "b66a8a7d3f1a86fc8aedd90fc4ef4fefee69e019d6f8d0e4e7d227ea078b305a",
+          "caption": "İki seramik fincan taslağı var. Birisi düz, diğeri çizgili. Hangi deseni tercih edersin? Yorumda seç.\n",
+          "caption_verdict": "REVIEW",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 1
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    },
+    {
+      "stage": "one-revision",
+      "finding": "Qwen retained both texts after one revision.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "b530f6b363f296b44fa77dbaa41a0f17dcd85313c5caae9231ecd87e5ec8f191",
+          "caption": "Bir sonraki gün için tek öncelik yazmayı öner. Fotoğrafta boş ajanda ve kalem var. Ajanda arama sözcüğü. Kaydet.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [
+              "kaydet"
+            ],
+            "signals": [
+              {
+                "code": "instruction_like_text",
+                "detail": "Possible instruction copied into audience-facing text; inspect manually."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "b530f6b363f296b44fa77dbaa41a0f17dcd85313c5caae9231ecd87e5ec8f191",
+          "caption": "İki seramik fincan taslağı var. Birisi düz, diğeri çizgili. Hangi deseni tercih edersin? Yorumda seç.\n",
+          "caption_verdict": "REVIEW",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    },
+    {
+      "stage": "existing-aya-comparison",
+      "finding": "Noncommercial-licensed existing model tested only on fictional research inputs. First caption missed save and exceeded hashtag limit; second used a valid comment CTA.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "b530f6b363f296b44fa77dbaa41a0f17dcd85313c5caae9231ecd87e5ec8f191",
+          "caption": "Yeni bir haftaya hazır mısın? Bu boş ajandayı yarının önceliği olacak şekilde bugün doldur! Kalemi eline alıp yarının planını bugün yap. #Ajanda #Planlama #Verimlilik #YeniHafta #Hedefler #OrganizeOl #Kalem #BoşAjanda\n",
+          "caption_verdict": "FIX",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "b530f6b363f296b44fa77dbaa41a0f17dcd85313c5caae9231ecd87e5ec8f191",
+          "caption": "Seramik fincanlarımızın taslaklarını gördünüz mü? Hangi tasarımı tercih edersiniz: basit ve şık olan düz tasarım mı, yoksa göz alıcı ve canlı olan çizgili tasarım mı? Bize yorumda seçiminizi söyleyin! #seramik #fincan #taslak #seçim #yorum\n",
+          "caption_verdict": "REVIEW",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [],
+            "signals": [
+              {
+                "code": "requested_cta_missing",
+                "detail": "The explicitly requested CTA was not detected."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        }
+      ],
+      "model": "aya:latest",
+      "model_digest": "7ef8c4942023233f441474200440ada6cb37ca276e52861e0fe8dd7aea570224"
+    },
+    {
+      "stage": "final-check",
+      "finding": "Updated action coverage works; instruction-copy and address-style issues still need human changes.",
+      "outputs": [
+        {
+          "account": "ornek_atolye",
+          "runner_sha256": "7d40b875da64b93b380a53478db5dd275b3ea0569800f0fc95728a5ccc4ff382",
+          "caption": "Bir sonraki gün için tek öncelik yazmayı öner. Fotoğrafta boş ajanda ve kalem var. Ajanda arama sözcüğü. Kaydet.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "save",
+            "detected_actions": [
+              "kaydet"
+            ],
+            "signals": [
+              {
+                "code": "instruction_like_text",
+                "detail": "Possible instruction copied into audience-facing text; inspect manually."
+              }
+            ],
+            "status": "review",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        },
+        {
+          "account": "ornek_seramik",
+          "runner_sha256": "7d40b875da64b93b380a53478db5dd275b3ea0569800f0fc95728a5ccc4ff382",
+          "caption": "İki seramik fincan taslağı var. Birisi düz, diğeri çizgili. Hangi deseni tercih edersin? Yorumda seç.\n",
+          "caption_verdict": "READY",
+          "quality": {
+            "expected_cta": "comment",
+            "detected_actions": [
+              "yorum yaz"
+            ],
+            "signals": [],
+            "status": "no_supported_issues",
+            "manual_review_required": true
+          },
+          "model_calls": 2
+        }
+      ],
+      "model": "qwen3:4b",
+      "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+    }
+  ]
+}

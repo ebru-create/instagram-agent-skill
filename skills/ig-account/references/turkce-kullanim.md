@@ -123,3 +123,12 @@ Türkçe sayı kısaltmaları tahmin edilmez; Instagram bağlantısı eklenmez. 
 için [CSV analizi](../../ig-audit/references/csv-analysis.md),
 [yayın kaydı](publications.md) ve [deneme](../../ig-plan/references/experiments.md)
 kılavuzlarını kullanın.
+
+### Türkçe açıklamada eylem çağrıları
+
+`aciklama`, `Yorumda seçiminizi belirtin`, `Yorumlarda fikrinizi paylaşınız`,
+`Kaydedin` gibi yaygın emir biçimlerini tanır. Yakın bir soru ve aynı sorunun
+cevabını yorumda istemek bir eylem türüdür; ayrıca kaydetmek/paylaşmak istenirse
+diğer tür de raporlanır. `asks` listesindeki türler aynı türün tekrar sayısı değildir.
+Alıntı ve örnek komutlar, etiketler, bazı olumsuz ve geçmiş zaman ifadeleri çağrı
+olarak sayılmaz. Destek sınırlıdır; her Türkçe ifade veya niyet otomatik çözülemez.

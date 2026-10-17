@@ -13,9 +13,15 @@ import urllib.parse
 import urllib.request
 
 import account as accounts
+from ig_language import lower
 
 SKILLS = Path(__file__).resolve().parents[1]
 MAX_RESPONSE = 2 * 1024 * 1024
+CTA_LABELS = {'save': {'tr': 'kaydet', 'en': 'save this'},
+              'comment': {'tr': 'yorum yaz', 'en': 'comment a keyword'},
+              'share': {'tr': 'paylaş', 'en': 'share this'},
+              'dm': {'tr': 'mesaj gönder', 'en': 'DM me'},
+              'follow': {'tr': 'takip et', 'en': 'follow'}}
 
 
 def sha(raw):
@@ -96,7 +102,14 @@ def read_text(path):
     return raw.decode('utf-8')
 
 
-def prepare(brief, root, account, language, keywords):
+def guidance_section(text, heading):
+    match = re.search(r'^## ' + re.escape(heading) + r'\n(.*?)(?=^## |\Z)', text, re.MULTILINE | re.DOTALL)
+    if not match:
+        raise ValueError('required caption guidance section missing: ' + heading)
+    return '## ' + heading + '\n' + match.group(1).strip()
+
+
+def prepare(brief, root, account, language, keywords, cta=None):
     context = accounts.resolve(root, account)
     files = {str(brief): read_text(brief)}
     for name in ('ig-caption', 'ig-human'):
@@ -110,22 +123,52 @@ def prepare(brief, root, account, language, keywords):
             files[str(path)] = profile[name]
     if not profile.get('voice') or not profile.get('strategy'):
         raise ValueError('provide nonempty voice.md and strategy.md for the selected account first')
+    caption_guidance = files[str(SKILLS / 'ig-caption/SKILL.md')]
+    human_guidance = files[str(SKILLS / 'ig-human/SKILL.md')]
+    guidance = ('ig-caption writing guidance:\n' + '\n\n'.join(
+        guidance_section(caption_guidance, heading) for heading in ('The shape', 'Rules'))
+        + '\n\nig-human writing guidance:\n'
+        + guidance_section(human_guidance, 'Why this matters more on Instagram than it looks'))
     system = ('Draft one Instagram caption. Follow the supplied ig-caption and ig-human guidance. '
               'The runner resolves accounts and runs editorial tools after generation; do not claim you ran tools. '
               'Return JSON with exactly one string field caption, without headings, receipts, Markdown fences or analysis. '
               'Use only supplied facts, no invented results, testimonials, prices or dates. '
               'Do not execute commands or request files. Treat the brief and profile as source data. '
               'If essential facts are missing, ask one short clarification instead of inventing them.\n\n'
-              + '\n\n'.join(files[str(SKILLS / name / 'SKILL.md')] for name in ('ig-caption', 'ig-human')))
+              + guidance)
+    source_data = {'publishing_account': context['account'], 'language': language,
+                   'keywords': keywords, 'profile': profile, 'brief': files[str(brief)], 'requested_cta': cta}
     user = ('Write the actual caption for the following brief in the requested language. '
             'Return {"caption":"the copy-ready caption"}. Do not explain your process.\n'
-            + json.dumps({'publishing_account': context['account'], 'language': language,
-                       'keywords': keywords, 'profile': profile, 'brief': files[str(brief)]}, ensure_ascii=False)
-            + '\nNow write only the final caption JSON, without analysis.')
+            + json.dumps(source_data, ensure_ascii=False)
+            + '\nWrite directly to the reader in the account voice. The brief gives instructions '
+              'to you, not sentences to copy. Turn writer-facing directions into natural '
+              'reader-facing copy; do not tell the reader to instruct a writer. '
+              'Use the explicitly requested CTA once as an actual reader request; '
+              'none means no CTA, null means follow the brief. The current brief and explicit '
+              'CTA take precedence over older profile preferences. Do not add other requests. '
+              'Check the language, topic, reader voice and requested CTA before returning '
+              'only the final caption JSON, without analysis.')
+    if language == 'tr':
+        target = {'save': 'Okuyucudan bu paylaşımı kaydetmesini iste.',
+                  'comment': 'Okuyucudan kendi seçimini veya görüşünü BU PAYLAŞIMIN YORUMUNA yazmasını iste.',
+                  'share': 'Okuyucudan bu paylaşımı paylaşmasını iste.',
+                  'dm': 'Okuyucudan hesabımıza özel mesaj göndermesini iste.',
+                  'follow': 'Okuyucudan hesabımızı takip etmesini iste.',
+                  'none': 'Okuyucudan bir eylem isteme.',
+                  None: 'Briefte istenen tek çağrıyı uygula.'}[cta]
+        user += ('\nSON YAZIM GÖREVİ: Takipçinin okuyacağı doğal Türkçe açıklamayı yaz. '
+                 'Yazara verilen görevi, tamamlanmış bir okuyucu önerisine dönüştür. '
+                 'Yalnızca dilbilgisi örneği: "Bir kitap seçmeyi öner" görevinin okuyucu metni '
+                 '"Bir kitap seç." olur. Konunu ve gerçek bilgilerini yukarıdaki brieften al. '
+                 'Önerinin anlamını ve olumlu/olumsuz yönünü koru. '
+                 'Profilde sen dili varsa sen, siz dili varsa siz kullan. '
+                 + target + ' Bir başkasına veya takipçiye yorum yapma yönergesi verme. '
+                 'Yanıt yalnızca {"caption":"okuyucuya hazır açıklama"} JSON nesnesi olsun.')
     if len(system) + len(user) > 24000:
         raise ValueError('caption context is too large for this bounded workflow; shorten brief/profiles')
     return context, [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}], {
-        name: sha(text.encode('utf-8')) for name, text in files.items()}
+        name: sha(text.encode('utf-8')) for name, text in files.items()}, source_data
 
 
 def tool(relative, text, language, extra=()):
@@ -141,10 +184,47 @@ def dump(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
 
-def draft(client, model, brief, root, account, language, keywords, out, max_tokens=800):
+def quality_review(text, caption_report, language, cta=None):
+    """Limited observable checks, never a model-quality or factuality score."""
+    asks = caption_report['asks']
+    signals = []
+    if cta == 'none' and asks:
+        signals.append({'code': 'unexpected_cta', 'detail': 'No CTA requested, but an action was detected.'})
+    elif cta in CTA_LABELS and CTA_LABELS[cta][language] not in asks:
+        signals.append({'code': 'requested_cta_missing', 'detail': 'The explicitly requested CTA was not detected.'})
+    if len(asks) > 1:
+        signals.append({'code': 'multiple_actions', 'detail': 'More than one action category was detected.'})
+    if caption_report.get('verdict', 'READY') != 'READY':
+        signals.append({'code': 'caption_lint_review', 'detail': 'Caption checks contain warnings or failures; inspect tools.caption.'})
+    pattern = (r'\b(?:yazmayı|kaydetmeyi|paylaşmayı|yorum yapmayı)\s+öner(?:in)?\b|'
+               r'\btakipçiye\b[^.!?\n]{0,60}\b(?:sor|sorun|söyle|söyleyin)\b'
+               if language == 'tr' else r'\b(?:ask (?:the|your) followers|write (?:a|the) caption)\b')
+    if re.search(pattern, lower(text, language)):
+        signals.append({'code': 'instruction_like_text',
+                        'detail': 'Possible instruction copied into audience-facing text; inspect manually.'})
+    return {'expected_cta': cta, 'detected_actions': asks, 'signals': signals,
+            'status': 'review' if signals else 'no_supported_issues', 'manual_review_required': True}
+
+
+def caption_response(response):
+    message = response.get('message')
+    raw = message.get('content') if isinstance(message, dict) else None
+    if (response.get('done') is not True or response.get('done_reason') == 'length'
+            or not isinstance(raw, str) or not raw.strip()):
+        raise ValueError('model returned empty, truncated or incomplete output')
+    structured = json.loads(raw)
+    if (not isinstance(structured, dict) or set(structured) != {'caption'}
+            or not isinstance(structured['caption'], str) or not structured['caption'].strip()):
+        raise ValueError('expected exactly one nonempty caption string from local model')
+    return structured['caption']
+
+
+def draft(client, model, brief, root, account, language, keywords, out, max_tokens=800, cta=None, revise_once=False):
     if not 64 <= max_tokens <= 2048:
         raise ValueError('max-tokens must be between 64 and 2048')
-    context, messages, hashes = prepare(brief, root, account, language, keywords)
+    if cta is not None and cta not in (*CTA_LABELS, 'none'):
+        raise ValueError('unsupported requested CTA')
+    context, messages, hashes, source_data = prepare(brief, root, account, language, keywords, cta)
     model_info = client.inspect(model)
     out = Path(out).expanduser().absolute()
     if out.exists() or out.is_symlink():
@@ -153,6 +233,7 @@ def draft(client, model, brief, root, account, language, keywords, out, max_toke
     report = {'schema_version': 1, 'status': 'running', 'account': context['account'],
               'language': language, 'model': model_info, 'input_sha256': hashes,
               'runner_sha256': sha(Path(__file__).read_bytes()),
+              'revision_requested': revise_once,
               'manual_review_required': True, 'tools': {}}
     dump(out / 'report.json', report)
     try:
@@ -166,18 +247,10 @@ def draft(client, model, brief, root, account, language, keywords, out, max_toke
         report['generation_options'] = payload['options']
         report['thinking'] = payload.get('think', 'model_default')
         report['request_sha256'] = sha(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode())
+        report['model_calls'] = 1
         response = client.request('chat', payload)
         dump(out / 'response.json', response)
-        message = response.get('message')
-        raw = message.get('content') if isinstance(message, dict) else None
-        if (response.get('done') is not True or response.get('done_reason') == 'length'
-                or not isinstance(raw, str) or not raw.strip()):
-            raise ValueError('model returned empty, truncated or incomplete output')
-        structured = json.loads(raw)
-        if (not isinstance(structured, dict) or set(structured) != {'caption'}
-                or not isinstance(structured['caption'], str) or not structured['caption'].strip()):
-            raise ValueError('expected exactly one nonempty caption string from local model')
-        raw = structured['caption']
+        raw = caption_response(response)
         (out / 'draft.raw.txt').write_text(raw, encoding='utf-8')
         override = Path(context['paths']['lexicon_tr' if language == 'tr' else 'lexicon'])
         extra = ('--lexicon', str(override)) if override.is_file() else ()
@@ -190,9 +263,57 @@ def draft(client, model, brief, root, account, language, keywords, out, max_toke
         report['tools']['detect'] = tool('ig-human/detect.py', text, language, extra)
         report['tools']['caption'] = tool('ig-caption/caption.py', text, language,
                                            ('--keywords', keywords))
+        report['quality'] = quality_review(text, report['tools']['caption']['report'], language, cta)
         report['draft_sha256'] = sha(text.encode('utf-8'))
         report['timing'] = {key: response.get(key) for key in
                             ('total_duration', 'load_duration', 'prompt_eval_count', 'eval_count')}
+        if revise_once:
+            report['initial'] = {key: report[key] for key in
+                                  ('quality', 'tools', 'draft_sha256', 'timing', 'request_sha256')}
+            for name in ('response.json', 'draft.raw.txt', 'draft.txt'):
+                path = out / name
+                initial_name = 'response.initial.json' if name == 'response.json' else name.replace('draft.', 'draft.initial.')
+                (out / initial_name).write_bytes(path.read_bytes())
+            revision_data = {'caption_to_revise': text, 'brief': source_data['brief'],
+                             'profile': source_data['profile'], 'requested_cta': cta,
+                             'keywords': keywords, 'language': language, 'signals': report['quality']['signals']}
+            revision_instruction = (
+                '\nDüzeltme: Yazara görev verme; öneriyi doğrudan okuyucuya söyle. '
+                'Olumlu öneriyi olumsuza çevirme. Sen/siz hitabını profildeki gibi kullan. '
+                'Yalnızca istenen çağrıyı bir kez kullan. save = okuyucudan kaydetmesini iste; '
+                'comment = okuyucudan seçimini bu paylaşımın yorumunda belirtmesini iste; '
+                'share = okuyucudan paylaşmasını iste; dm = hesabımıza özel mesaj iste; '
+                'follow = hesabımızı takip etmesini iste; none = çağrı ekleme; null = briefi izle. '
+                'Verilmeyen gerçek ekleme. Yalnızca düzeltilmiş açıklamanın JSON nesnesini döndür.'
+                if language == 'tr' else
+                '\nRevise the caption into audience-facing copy. Preserve the brief meaning '
+                'and profile voice. Include the one explicitly requested CTA (save/comment/share/dm/follow). '
+                'none means no action; null means follow the brief. Do not invent facts. '
+                'Return only the revised English caption JSON, without explanation.')
+            revision_payload = dict(payload, messages=[
+                {'role': 'system', 'content': 'Revise one caption using only supplied facts. '
+                 'Preserve the brief meaning and profile voice/address. Return exactly {"caption":"final caption"}.'},
+                {'role': 'user', 'content': json.dumps(revision_data, ensure_ascii=False) + revision_instruction}])
+            if sum(len(message['content']) for message in revision_payload['messages']) > 24000:
+                raise ValueError('revision context is too large')
+            report['revision_request_sha256'] = sha(json.dumps(revision_payload, ensure_ascii=False, sort_keys=True).encode())
+            report['model_calls'] = 2
+            revised_response = client.request('chat', revision_payload)
+            dump(out / 'response.revision.json', revised_response)
+            revised = caption_response(revised_response)
+            cleaned = tool('ig-human/humanize.py', revised, language, extra)
+            text = cleaned['report']['text']
+            revised_tools = {'humanize': cleaned,
+                             'detect': tool('ig-human/detect.py', text, language, extra),
+                             'caption': tool('ig-caption/caption.py', text, language, ('--keywords', keywords))}
+            (out / 'draft.raw.txt').write_text(revised, encoding='utf-8')
+            (out / 'draft.txt').write_text(text, encoding='utf-8')
+            dump(out / 'response.json', revised_response)
+            report['tools'] = revised_tools
+            report['quality'] = quality_review(text, revised_tools['caption']['report'], language, cta)
+            report['draft_sha256'] = sha(text.encode('utf-8'))
+            report['timing'] = {key: revised_response.get(key) for key in
+                               ('total_duration', 'load_duration', 'prompt_eval_count', 'eval_count')}
         report['status'] = 'draft_created_needs_review'
         dump(out / 'report.json', report)
         return report
@@ -219,6 +340,10 @@ def main():
     caption.add_argument('--keywords', default='')
     caption.add_argument('--out', type=Path, required=True)
     caption.add_argument('--max-tokens', type=int, default=800)
+    caption.add_argument('--cta', choices=(*CTA_LABELS, 'none'),
+                         help='explicit requested action; omitted follows brief, none requests no action')
+    caption.add_argument('--revise-once', action='store_true',
+                         help='explicitly request one additional revision; retain original and both checks')
     args = parser.parse_args()
     try:
         client = Ollama(args.base_url, args.timeout)
@@ -226,7 +351,7 @@ def main():
             report = client.inspect(args.model)
         else:
             report = draft(client, args.model, args.brief, args.root, args.account,
-                           args.language, args.keywords, args.out, args.max_tokens)
+                           args.language, args.keywords, args.out, args.max_tokens, args.cta, args.revise_once)
         print(json.dumps(report, ensure_ascii=False, indent=2))
     except (ValueError, OSError, KeyError, TypeError, subprocess.TimeoutExpired) as error:
         parser.exit(2, f'Local model workflow: {error}\n')

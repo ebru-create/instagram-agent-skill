@@ -22,7 +22,10 @@ folder connects to an already installed local Ollama model, supplies this accoun
 voice/strategy and caption/human instructions, then runs the existing text tools.
 Use `--help` for doctor/caption options. Require an explicit account, model, brief
 and new output directory; the runner does not download models or publish. Its
-`draft_created_needs_review` status and exit 0 are technical completion, not
+optional `--cta` sets an explicit requested action. `--revise-once` requests at
+most one extra model call, retaining the first draft and checks. Compare both;
+revision can fail or worsen the text. Review `quality` signals as well as linters.
+The `draft_created_needs_review` status and exit 0 are technical completion, not
 editorial approval. Inspect `report.json`, `draft.raw.txt` and `draft.txt`; model
 facts, language and instruction-following need human review. Generic planning,
 Reels and autonomous model tool use are outside this first caption adapter.
