@@ -458,6 +458,30 @@ selects a custom root. Prior snapshots and `results.md` are preserved. Explain
 findings in English or Turkish through `/ig-audit`, then hand them to `/ig-plan`.
 See the [CSV contract and interpretation guide](skills/ig-audit/references/csv-analysis.md).
 
+## Track a content experiment
+
+`ig-plan/experiment.py` connects an explicit hypothesis and two approaches to
+the account's canonical CSV results. Record the primary metric, direction,
+practical difference, observation age, review date and test-specific count target.
+Keep assignments empty until actual published post IDs are available.
+
+```bash
+python3 skills/ig-plan/experiment.py skills/ig-plan/example.experiment.tr.json --account ornek_studyo
+python3 skills/ig-plan/experiment.py skills/ig-plan/example.experiment.tr.json --account ornek_studyo --csv skills/ig-audit/example.synthetic.csv --as-of 2026-09-13T12:00:00+03:00
+```
+
+The example is fictional; its one-post target is for arithmetic demonstration.
+The tool discloses missing/excluded assignments and waits for the agreed review
+date and usable observations before returning a median difference and threshold
+check. A met threshold is descriptive, not statistical significance or a causal
+winner. It does not automatically change the plan or schedule anything.
+
+Default output is read-only JSON. `--save` creates a fresh snapshot under the
+initialized account's `experiments/` directory, with the plan and input hashes,
+preserving previous records, `plan.md` and `results.md`. Plan revisions remain
+visible by hash; a saved record is not proof of prospective registration.
+Read [the experiment schema and review workflow](skills/ig-plan/references/experiments.md).
+
 ## Reproducible evaluation
 
 Run a local evaluation with explicit labels and dataset provenance:

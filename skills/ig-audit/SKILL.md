@@ -72,6 +72,14 @@ Read coverage and limitations before interpreting the numbers. Explain the JSON
 in the user's language; its keys are stable English identifiers. The bundled
 `example.synthetic.csv` is fictional and must never substitute for account data.
 
+When evaluating a recorded content test, use
+[the experiment workflow](../ig-plan/references/experiments.md) with the same
+account and actual post assignments. Check original criteria and plan revisions;
+do not select only successful posts for the comparison. `ready_descriptive`
+means the recorded review date/data criteria are met, not that the result is
+statistically reliable. Discuss the evidence and confounders before recommending
+a next plan; a met practical threshold alone is not a scaling instruction.
+
 ## Calculate only supported measures
 
 Choose a primary metric aligned to the goal and available data. Use other
