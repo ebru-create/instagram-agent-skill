@@ -27,7 +27,7 @@ not validated performance predictions or AI-authorship detection.
 
 ## Account context
 
-For a slot from `/ig-plan`, preserve its publishing account, goal, time budget,
+For a slot from `ig-plan`, preserve its publishing account, goal, time budget,
 post/frame count and camera constraints. These take precedence over this skill's
 generic format suggestions. Read the resolved `strategy` brief if needed.
 
@@ -83,7 +83,7 @@ account’s completion data if available; do not invent an optimal frame number.
 
 The question box is the most undervalued one in the list. Every answer is a
 caption, a Reel hook or a DM opener written in the audience's own words. Feed
-them to `/ig-reel` as formula #16.
+them to `ig-reel` as formula #16.
 
 ## Rules
 

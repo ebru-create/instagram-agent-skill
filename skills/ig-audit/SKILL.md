@@ -142,8 +142,8 @@ than letting one unusually large result dominate an average.
 
 Low views alone do not diagnose a hook problem. High reach with few follows
 could reflect audience fit, the content promise, CTA or profile, among other
-factors. Compare the available funnel evidence before suggesting `/ig-profile`
-or `/ig-reel`. A retention gap does not rule out topic or first-frame effects.
+factors. Compare the available funnel evidence before suggesting `ig-profile`
+or `ig-reel`. A retention gap does not rule out topic or first-frame effects.
 Timing may be worth a test when relevant; neither prioritize nor dismiss it by
 rule. If the evidence cannot distinguish explanations, say so.
 
@@ -162,13 +162,13 @@ aldı: %2,0 ve %0,9. İkisi de organik karusel; örneklem iki içerik.
 YORUM: İlk içerikte paylaşım oranı daha yüksek; nedenini henüz ayıramıyoruz.
 SINIR: Konular ve kapaklar farklı. Satış veya nitelikli başvuru verisi yok.
 SONRAKİ DENEME: Benzer konuda iki kapak yaklaşımı; ana ölçüt ve bütçe
-hesabın hedefiyle birlikte /ig-plan içinde belirlenecek.
+hesabın hedefiyle birlikte ig-plan içinde belirlenecek.
 ```
 
 Save the completed audit to the resolved `results` path with account, goal,
 period, sources/capture dates, coverage, metric definitions, observations,
 hypotheses, uncertainties and review criteria. Preserve relevant prior findings
 and mark what this audit supersedes. Pass the same publishing account and
-supported findings to `/ig-plan`; optional `/ig-viral` research should explore
+supported findings to `ig-plan`; optional `ig-viral` research should explore
 hypotheses rather than filter out everything not already labelled a winner.
 Never combine publishing accounts unless the user explicitly requests comparison.

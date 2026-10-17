@@ -5,12 +5,14 @@ Python 3.10+ is required. The installer uses only the standard library and does
 not install Python packages, create account profiles or reload the agent host.
 
 ```bash
-python3 scripts/install.py --dry-run
-python3 scripts/install.py
-python3 scripts/install.py --check
+python3 scripts/install.py --host codex --dry-run
+python3 scripts/install.py --host codex
+python3 scripts/install.py --host codex --check
 ```
 
-Default destination: `~/.claude/skills`. Add the same `--skills-dir PATH` to every
+Choose `--host codex` for `~/.agents/skills`, `--host claude-code` for
+`~/.claude/skills`, or `--host generic --skills-dir PATH` for another agent.
+Omitting `--host` preserves the old Claude destination. Add the same `--skills-dir PATH` to every
 command when using another destination. All fourteen `ig-*` folders and shared
 assets install together. Voice/strategy templates are assembled under
 `ig-account/assets/templates/`. Optional Pillow/fonts are separate; see
@@ -25,13 +27,18 @@ creating a destination.
 
 ## Updating
 
+Keep the same `--host` and any explicit `--skills-dir` in every command. The
+example below updates a default Codex installation; for earlier Codex installs
+in `~/.codex/skills`, also pass that explicit destination as shown in
+[host selection](hosts.md).
+
 For a checkout, first fetch the desired reviewed source version:
 
 ```bash
 git pull --ff-only
-python3 scripts/install.py --update --dry-run
-python3 scripts/install.py --update
-python3 scripts/install.py --check
+python3 scripts/install.py --host codex --update --dry-run
+python3 scripts/install.py --host codex --update
+python3 scripts/install.py --host codex --check
 ```
 
 For a source ZIP, extract the new version into a new folder, verify its release
@@ -41,13 +48,16 @@ copy may differ from an older checkout; use the matching source for `--check`.
 The manifest `.instagram-agent-install.json` records package-owned file hashes.
 Extra files and unrelated skills stay intact. Modified package-owned files stop
 an update; missing files can be repaired. Account data normally lives separately
-under `~/.claude/instagram/` and is not migrated or replaced by installation.
+under the resolved data root and is not migrated or replaced by installation.
+Explicit tool roots override `INSTAGRAM_AGENT_HOME`; otherwise an existing
+`~/.claude/instagram` wins, or new setups use `~/.local/share/instagram-agent`.
+See [host selection](hosts.md) before changing an existing destination.
 
 For a deliberate replacement of manually copied folders or package edits:
 
 ```bash
-python3 scripts/install.py --update --replace-existing --dry-run
-python3 scripts/install.py --update --replace-existing
+python3 scripts/install.py --host codex --update --replace-existing --dry-run
+python3 scripts/install.py --host codex --update --replace-existing
 ```
 
 Use replacement only when you intend the source package to replace those edits.

@@ -12,12 +12,15 @@ Python 3.10 veya üzeri gerekir. Depo kökünde:
 ```bash
 git clone https://github.com/ebru-create/instagram-agent-skill.git
 cd instagram-agent-skill
-python3 scripts/install.py --dry-run
-python3 scripts/install.py
-python3 scripts/install.py --check
+python3 scripts/install.py --host codex --dry-run
+python3 scripts/install.py --host codex
+python3 scripts/install.py --host codex --check
 ```
 
-Varsayılan hedef `~/.claude/skills` klasörüdür. Projeye özel kurulum için her
+Codex hedefi `~/.agents/skills` klasörüdür. Claude Code için `--host claude-code`
+kullan; `--host` verilmezse eski `~/.claude/skills` hedefi korunur.
+Genel ajanlar için `--host generic --skills-dir PATH` kullan.
+[Ortam seçimi ve yerel modeller](hosts.md) gereksinimleri açıklar. Projeye özel kurulum için her
 komuta aynı `--skills-dir /path/to/proje/.claude/skills` eklenir.
 İndirilen hazırlanmış ZIP'te klasörü açıp aynı kurulum komutlarını çalıştırın;
 `git clone` gerekmez. [Güncelleme ve yedekleme](installation.md) ayrıntıları.
@@ -41,7 +44,7 @@ Birden fazla hesapta aynı hesabı tüm adımlara açıkça geçir. Araştırıl
 mesaj yazılan hesap, yayın hesabını değiştirmez. Asistana örneğin şöyle yaz:
 
 ```text
-/ig-plan: @HESAP_ADI için gelecek haftayı planla.
+ig-plan becerisini kullan: @HESAP_ADI için gelecek haftayı planla.
 Hedefim nitelikli atölye başvurusu. Haftada 90 dakikam var, en fazla iki paylaşım.
 Kamera karşısına geçmeden üretebilirim. Bilmediğin sonuçları veya müşteri hikâyelerini uydurma.
 ```
@@ -91,3 +94,11 @@ Türkçe [baştan sona örnek](walkthrough.tr.md) bu adımların bağlantısın�
   mevcut çıktı klasörünü yeniden kullanma. [Yerleşim kılavuzunu](../skills/ig-carousel/references/rendering.md) incele.
 - **Güncellemede yerel değişiklik bulundu:** [kurulum rehberindeki](installation.md)
   kuru çalıştırma ve yedek adımlarını izle.
+
+## Ortak hesap verileri
+
+Kurulum hedefi hesap verisinin yerini değiştirmez. `--kok PATH` açık kökü seçer;
+yoksa `INSTAGRAM_AGENT_HOME` ortam değişkeni kullanılır. Bu da verilmezse mevcut
+`~/.claude/instagram` korunur; yeni kurulumlarda `~/.local/share/instagram-agent`
+kullanılır. İki kök varsa eski kök önceliklidir; diğerini seçmek için açık kök
+veya ortam değişkeni kullan. Hesaplar otomatik taşınmaz ve kökler arasında aranmaz.

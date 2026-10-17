@@ -3,6 +3,14 @@
 Versions below describe development milestones in this fork. An entry is not
 proof that a corresponding GitHub Release or tag has been published.
 
+## [1.13.0] — host-independent core
+
+- Read core package identity/version from `instagram-agent.json`, independently of Claude plugin metadata.
+- Add `--host codex`, `--host claude-code` and explicit-destination `--host generic` installation.
+- Resolve account data through explicit CLI roots, `INSTAGRAM_AGENT_HOME`, existing legacy data or a neutral default.
+- Preserve existing installations, local edits, backups and account selection; never auto-migrate account data.
+- Document host capabilities and plain-language invocation for local/open-weight model agents; no model runner or provider adapter is bundled.
+
 ## [1.12.0] — release preparation
 
 - Reorganize the README around the implemented workflow and current tool inventory.

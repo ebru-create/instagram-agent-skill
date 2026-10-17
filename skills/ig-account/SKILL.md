@@ -32,8 +32,12 @@ Use approved Turkish brand examples for manual voice review; do not rewrite
 just to raise a score. Turkish scores are provisional editorial signals,
 not validated performance predictions or AI-authorship detection.
 
-Keep each publishing account's voice, plan, research, log and results under
-`~/.claude/instagram/accounts/HANDLE/`. Handles are case-insensitive; a leading
+Keep each publishing account's voice, plan, research, log and results under the
+root returned by the helper, in `accounts/HANDLE/`. Explicit `--root` wins over
+`INSTAGRAM_AGENT_HOME`; otherwise an existing `~/.claude/instagram` root is
+preserved, or a fresh setup uses `~/.local/share/instagram-agent`. Never search
+other roots for a missing account. These paths are independent of the model or
+host. Handles are case-insensitive; a leading
 `@` is accepted. Run this folder's helper by its installed absolute path:
 
 ```bash
@@ -77,7 +81,7 @@ request. Never fall back to a different account or legacy file. This is local
 workflow separation, not OS access control for mutually untrusted users.
 
 For an existing single-account installation, `python3 account.py show` still
-returns the old `~/.claude/instagram/` paths when no named accounts exist.
+returns single-account paths in the resolved root when no named accounts exist.
 Once any named account exists, require explicit selection even if there is
 only one. `show` never creates files or silently picks an account.
 

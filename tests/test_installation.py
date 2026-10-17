@@ -34,6 +34,7 @@ class InstallationTests(unittest.TestCase):
         shutil.copytree(ROOT / "templates", source / "templates")
         (source / ".claude-plugin").mkdir()
         shutil.copy2(ROOT / ".claude-plugin/plugin.json", source / ".claude-plugin/plugin.json")
+        shutil.copy2(ROOT / "instagram-agent.json", source / "instagram-agent.json")
         return source
 
     def test_dry_run_creates_no_destination(self):
@@ -118,7 +119,7 @@ class InstallationTests(unittest.TestCase):
     def test_version_changes_are_reported_as_outdated(self):
         source = self.make_source()
         installer.install(self.target, source)
-        config = source / ".claude-plugin/plugin.json"
+        config = source / "instagram-agent.json"
         data = json.loads(config.read_text()); data["version"] = "99.0.0"
         config.write_text(json.dumps(data))
         with self.assertRaisesRegex(ValueError, "run --update"):
