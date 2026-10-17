@@ -30,7 +30,10 @@ Or do it yourself, in Claude Code:
 
 ```bash
 git clone https://github.com/ebru-create/instagram-agent-skill.git
-cp -r instagram-agent-skill/skills/ig-* ~/.claude/skills/
+cd instagram-agent-skill
+python3 scripts/install.py --dry-run
+python3 scripts/install.py
+python3 scripts/install.py --check
 ```
 
 Or as a plugin:
@@ -40,9 +43,9 @@ Or as a plugin:
 /plugin install instagram-agent
 ```
 
-Project-local instead of global: copy the same folders into your repo's
-`.claude/skills/`. No Claude Code at all? Paste any single `SKILL.md` at the top
-of a chat and it runs as a mode. You lose the five Python tools, which is most
+Project-local instead of global: pass `--skills-dir /your/project/.claude/skills`
+to the installer and the check command. No Claude Code at all? Paste any single
+`SKILL.md` at the top of a chat and it runs as a mode. You lose the five Python tools, which is most
 of the point of `/ig-reel` and `/ig-human`, but the rest works.
 
 Then spend ten minutes on `templates/voice.md`. Copy it to
@@ -52,6 +55,65 @@ reels and say "write my voice.md from these". Each skill uses the selected
 account’s file. It
 matters more here than on other platforms, because you have to say the words
 out loud.
+
+## Install and update checks
+
+The installer targets `~/.claude/skills` by default, or the explicit directory
+passed with `--skills-dir`. It installs all fourteen `ig-*` folders together,
+including the shared language helper and Turkish catalogues. Voice and strategy
+templates are bundled under `ig-account/assets/templates/` so they remain
+available after installation without the repository checkout.
+
+`--dry-run` checks sources and conflicts without creating directories or running
+tools. A real install stages files and runs thirteen functional checks: six
+text tools in both languages plus the account resolver with a scratch profile.
+It only activates the staged folders after these pass. `--check` verifies the
+installed file hashes against the manifest and this checkout, then runs the
+same tool checks. It does not modify installed files or real account profiles;
+functional checks use temporary input, not your saved content.
+
+To update from a newer checkout, run from the repository root:
+
+```bash
+git pull --ff-only
+python3 scripts/install.py --update --dry-run
+python3 scripts/install.py --update
+python3 scripts/install.py --check
+```
+
+For a custom destination, repeat the same `--skills-dir` in every command.
+The installer records package-owned files in `.instagram-agent-install.json`.
+It preserves extra files in skill folders and unrelated skills. Modified
+package-owned files stop an update; missing files can be repaired. Account
+profiles under `~/.claude/instagram/` are not installed, copied or migrated.
+
+Old folders copied manually have no installation manifest. To replace those,
+or deliberately replace local edits, use the explicit option below only when
+you want the checkout's packaged versions to become active:
+
+```bash
+python3 scripts/install.py --update --replace-existing --dry-run
+python3 scripts/install.py --update --replace-existing
+```
+
+Every update that replaces existing folders retains the old folders and manifest
+under `.instagram-agent-backups/` within the chosen skills directory. The result
+prints the backup path. Nonconflicting extra files stay in the active copy as
+well. Move intentional brand-specific lexicon edits into that account's override before
+updating, so future updates need not replace custom vocabulary.
+
+A caught activation error rolls the previous folders back. An abrupt power loss
+or process termination is not a globally atomic transaction: retain the hidden
+backup/staging directories for recovery if interrupted. To restore a
+completed update manually, close active skill work, move the affected current
+folders aside, then restore the corresponding backed-up folders and manifest.
+Do not blindly merge old and new code. The installer never deletes old backups.
+Concurrent installer runs are blocked by `.instagram-agent-install.lock`; after an abrupt interruption, inspect the
+installation and backups before removing a stale lock directory and retrying.
+
+These commands install local files; they do not log into Instagram, publish
+content, install Python packages, or automatically reload a running agent.
+Restart/reload the host's skill session if it still shows the old instructions.
 
 ## Separate publishing accounts
 
@@ -433,6 +495,7 @@ skills/ig-human/humanize.py        the three cleaning passes
 skills/ig-human/detect.py          the five-check panel
 skills/ig-viral/swipe.py           outlier ranking and formula classification
 skills/ig-profile/rubric.json      the 100-point profile score
+scripts/install.py               complete-bundle install, update, backup and checks
 templates/voice.md                 your voice profile. Fill this in first.
 templates/strategy.md              confirmed goals, capacity and review criteria
 evaluation/evaluate.py            local hook metrics with provenance and source hashes

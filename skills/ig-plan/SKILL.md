@@ -69,8 +69,9 @@ question while preparing angles from supplied material. If the user requests a
 quick draft, state provisional assumptions and offer a small editable plan.
 Do not pretend those assumptions are confirmed preferences or analytics.
 Record supplied or confirmed preferences in the resolved `strategy` path;
-`templates/strategy.md` is an optional starting format. Preserve unrelated
-preferences when updating it. Keep provisional assumptions in the plan only.
+`templates/strategy.md` (or installer-bundled
+`../ig-account/assets/templates/strategy.md`) is an optional starting format.
+Preserve unrelated preferences when updating it. Keep provisional assumptions in the plan only.
 
 ## Choose a feasible mix
 

@@ -36,12 +36,14 @@ python3 account.py show --account studio_one
 
 `init` only creates the account directory, leaves existing files untouched,
 and returns paths. Populate `voice.md` from the user's own examples or the
-repository's `templates/voice.md`. Do not invent a voice or copy another brand.
+repository's `templates/voice.md` (installer-bundled copies are at
+`assets/templates/voice.md` beside this skill). Do not invent a voice or copy
+another brand.
 Other context files are created only when the workflow produces their content.
 `results.md` stores account-specific audit findings for later planning.
 `strategy.md` stores supplied or confirmed goals, production capacity and review
-criteria; use `templates/strategy.md` from the repository if useful. It is
-optional and is not auto-created or populated with guessed preferences.
+criteria; use `templates/strategy.md` from the repository or the installer-bundled
+`assets/templates/strategy.md` if useful. It is optional and is not auto-created or populated with guessed preferences.
 Optional `slop.json` (English) and `slop.tr.json` (Turkish) lexicon overrides
 also stay in this directory; it never
 changes another account's vocabulary rules.
