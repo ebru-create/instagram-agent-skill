@@ -458,6 +458,29 @@ selects a custom root. Prior snapshots and `results.md` are preserved. Explain
 findings in English or Turkish through `/ig-audit`, then hand them to `/ig-plan`.
 See the [CSV contract and interpretation guide](skills/ig-audit/references/csv-analysis.md).
 
+## Link drafts to reported publications
+
+`ig-account/publication.py` records the user's actual post ID and publication
+time against a stable local content reference, separately from draft approvals.
+It does not publish or verify Instagram activity. The bundled example is fictional.
+
+```bash
+python3 skills/ig-account/publication.py check skills/ig-account/example.publication.tr.json --account ornek_studyo
+python3 skills/ig-account/publication.py record /path/to/your-publication.json --account YOUR_HANDLE
+python3 skills/ig-account/publication.py list --account YOUR_HANDLE
+python3 skills/ig-account/publication.py reconcile /path/to/insights.csv --account YOUR_HANDLE
+```
+
+`check` is read-only. Recording requires an initialized account and uses its
+resolved `publications.json`. Duplicate content/post IDs are refused; explicit
+`record ... --revise` appends a correction under the same content_id and preserves
+earlier revisions. Existing plans, draft logs, results and snapshots stay intact.
+
+CSV reconciliation discloses matching identities, conflicting format/treatment/
+publication times, unregistered CSV posts and records outside the supplied CSV.
+It does not rewrite either source or infer that missing rows were unpublished.
+See [publication schema and workflow](skills/ig-account/references/publications.md).
+
 ## Track a content experiment
 
 `ig-plan/experiment.py` connects an explicit hypothesis and two approaches to
