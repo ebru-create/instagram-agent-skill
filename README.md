@@ -505,6 +505,28 @@ preserving previous records, `plan.md` and `results.md`. Plan revisions remain
 visible by hash; a saved record is not proof of prospective registration.
 Read [the experiment schema and review workflow](skills/ig-plan/references/experiments.md).
 
+## End-to-end workflow validation
+
+Replay one fictional Turkish account through a fresh installed bundle: a fixed
+plan/draft, caption checks, two carousel exports, user-reported publication
+records, CSV reconciliation, analytics and experiment review. A second account
+checks isolation. Expected failures include duplicate records, wrong accounts,
+conflicting CSV identities, early review and missing observations.
+
+```bash
+python3 validation/run_workflow.py --font /path/to/font.ttf --out /path/to/new-validation
+```
+
+Requires the carousel's optional Pillow and a suitable font. The output directory
+must be new; account data and installed skills are isolated inside it. Reports,
+command receipts, images and input/output snapshots are retained for inspection.
+CI uploads the scenario outputs for each supported Python version.
+
+`passed_with_manual_review` means the local integration checks passed with
+editorial/visual review still required. Fixed synthetic inputs do not validate a
+model's creative choices or real account performance. See the
+[Turkish workflow guide](validation/README.md) for coverage and limits.
+
 ## Reproducible evaluation
 
 Run a local evaluation with explicit labels and dataset provenance:

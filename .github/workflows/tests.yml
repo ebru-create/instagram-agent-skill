@@ -24,6 +24,7 @@ jobs:
       - run: python skills/ig-audit/analyse.py skills/ig-audit/example.synthetic.csv --account ornek_studyo --primary-metric shares_per_reach > analytics-example.json
       - run: python skills/ig-plan/experiment.py skills/ig-plan/example.experiment.tr.json --account ornek_studyo --csv skills/ig-audit/example.synthetic.csv --as-of 2026-09-13T12:00:00+03:00 > experiment-example.json
       - run: python skills/ig-carousel/render.py skills/ig-carousel/example.tr.json --font /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf --out carousel-example
+      - run: python validation/run_workflow.py --font /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf --out workflow-example
       - uses: actions/upload-artifact@v4
         with:
           name: hook-evaluation-python-${{ matrix.python-version }}
@@ -40,3 +41,8 @@ jobs:
         with:
           name: experiment-synthetic-python-${{ matrix.python-version }}
           path: experiment-example.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: workflow-synthetic-python-${{ matrix.python-version }}
+          path: workflow-example

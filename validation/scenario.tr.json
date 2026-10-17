@@ -1,0 +1,14 @@
+{
+  "kind": "synthetic-workflow-fixture",
+  "account": "ornek_studyo",
+  "other_account": "baska_studyo",
+  "language": "tr",
+  "goal": "Paylaşım/erişim oranını tutarlı ölçümle değerlendirmek",
+  "weekly_minutes": 90,
+  "shared_preparation_minutes": 20,
+  "slots": [
+    {"content_id": "kurgusal-atolye-kapak-01", "post_id": "fictional-1", "variant": "control", "minutes": 35, "cover": "İyi bir atölye üç soruyla başlar"},
+    {"content_id": "kurgusal-atolye-kapak-02", "post_id": "fictional-2", "variant": "variant", "minutes": 35, "cover": "İyi bir atölye nasıl başlar?"}
+  ],
+  "as_of": "2026-09-13T12:00:00+03:00"
+}
